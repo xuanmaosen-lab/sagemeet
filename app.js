@@ -316,6 +316,8 @@ function planeWindow(p, i) {
 }
 
 const ICON_MIC = `<svg class="ico-svg" viewBox="0 0 162 237" aria-hidden="true" fill="currentColor"><rect x="36" y="0" width="90" height="150" rx="45"/><path d="M10 100a71 71 0 0 0 142 0M81 171v54M45 228h72" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"/></svg>`;
+const ICON_CALL = `<svg class="ico-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 2h6v6M22 2l-7 7"/><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>`;
+const ICON_SEND = `<svg class="ico-svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>`;
 const ICON_PHONE = `<svg class="ico-svg" viewBox="0 0 200 200" aria-hidden="true" fill="currentColor"><circle cx="48" cy="44" r="36"/><circle cx="156" cy="152" r="36"/><path d="M40 60C40 120 80 160 140 160" fill="none" stroke="currentColor" stroke-width="46" stroke-linecap="round"/></svg>`;
 
 function planeRow(list) {
@@ -325,6 +327,17 @@ function planeRow(list) {
       ${list}
     </div>
   </div>`;
+}
+
+function uiIcon(name) {
+  const paths = {
+    arrow: '<path d="M4 12h15m-6-6 6 6-6 6"/>',
+    clock: '<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>',
+    chat: '<path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-3 3V12a8 8 0 0 1 16-1"/><path d="M7 10h6m-6 4h9"/>',
+    leaf: '<path d="M5 18C0 6 13 3 21 3c0 11-4 17-12 16M4 21 15 10"/>',
+    heart: '<path d="M20 5c-3-3-7-1-8 1-1-2-5-4-8-1-4 4 1 9 8 15 7-6 12-11 8-15Z"/>',
+  };
+  return `<svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.leaf}</svg>`;
 }
 
 function modeToggle() {
@@ -404,38 +417,37 @@ function wrap(body, chapterId) {
 
 /* ——— Splash ——— */
 function splash() {
-  const back = s.mode === 'returning';
-  const action = back ? 'enter-returning' : 'start';
-  const copy = back
-    ? { tag: '点击任意处进入', l1: '欢迎回来', l2: '进入智遇*', note: '*老客模式 · 小知 · 聊天 · 遇见 · 经历' }
-    : { tag: '点击任意处开始', l1: '和小知聊聊天', l2: '遇见懂你的人*', note: '*大约 8 分钟 · 你说的每句话都只属于你' };
-  return wrap(`<footer class="sf-footer" aria-label="智遇开屏" data-a="${action}" tabindex="0">
-    <div class="sf-bg" aria-hidden="true">
-      <video muted playsinline preload="auto" src="assets/splash/footer-warm-720.mp4"></video>
-    </div>
-    <div class="sf-jobs">
-      <span class="sf-tag">先聊经历，再遇见人</span>
-      <span class="sf-headline sf-job-title">用真实的人生经历，<br>遇见同频的你。</span>
-      <div class="sf-nav">
-        <span>小知</span>
-        <span>聊天</span>
-        <span>遇见</span>
-        <span>经历</span>
+  return wrap(`<div class="welcome-page">
+    <header class="welcome-header">
+      <a class="brand-lockup" href="#" aria-label="智遇首页"><span class="mark mark-sm" aria-hidden="true"></span>智遇 <small>SAGEMEET</small></a>
+      <nav class="welcome-nav" aria-label="了解智遇"><a href="#how-it-works">怎样遇见</a><button type="button" data-a="mode-returning">回到我的树洞 ${uiIcon('arrow')}</button></nav>
+    </header>
+    <section class="welcome-hero" aria-labelledby="welcome-title">
+      <div class="welcome-copy">
+        <h1 id="welcome-title">用真实的人生经历，<br>遇见<span>同频的你。</span></h1>
+        <p class="welcome-intro">先聊经历，再遇见人。<br>和小知聊聊天，让每一次靠近，<br class="mobile-break">都从被理解开始。</p>
+        <button type="button" class="btn welcome-cta" data-a="start">和小知聊聊 ${uiIcon('arrow')}</button>
+        <p class="welcome-note">${uiIcon('clock')} 大约 8 分钟，从一个小故事开始</p>
+        <div class="welcome-detail"><span class="detail-line"></span> 小知 · 聊天 · 遇见 · 经历</div>
       </div>
-    </div>
-    <div class="sf-logo" role="img" aria-label="智遇 Sagemeet">
-      <span class="mark" aria-hidden="true"></span>
-      <span class="sf-wordmark" aria-hidden="true">智遇<small>SAGEMEET</small></span>
-    </div>
-    <div class="sf-contact">
-      <span class="sf-tag sf-tag-cta">${copy.tag}</span>
-      <div class="sf-headline sf-contact-links">
-        <span>${copy.l1}</span>
-        <span>${copy.l2}</span>
+      <div class="welcome-art">
+        <div class="welcome-orbit" aria-hidden="true"></div>
+        <div class="sf-bg"><video muted playsinline preload="metadata" src="assets/splash/footer-warm-720.mp4" aria-label="抱着爱心的小知玩偶"></video></div>
+        <div class="welcome-dialogue"><span class="dialogue-dot" aria-hidden="true"></span><span>你好呀，我是小知<small>你的倾听伙伴</small></span></div>
+        <img class="welcome-garden" src="assets/garden/botanical-garden.webp" alt="" width="1400" height="934" aria-hidden="true">
+        <div class="welcome-caption">慢慢说，我在听。${uiIcon('heart')}</div>
       </div>
-      <p class="sf-note">${copy.note}</p>
-    </div>
-  </footer>`, 0);
+    </section>
+    <section class="welcome-journey" id="how-it-works" aria-labelledby="journey-title">
+      <div class="journey-heading"><h2 id="journey-title">让相遇，自然发生。</h2><p>从认识自己，到认识聊得来的人。</p></div>
+      <ol class="journey-steps">
+        <li><span class="journey-icon lavender">${uiIcon('chat')}</span><div><h3>先和小知聊一聊</h3><p>从日常和经历里，慢慢认识自己。</p></div></li>
+        <li><span class="journey-icon sage">${uiIcon('leaf')}</span><div><h3>看见独一无二的你</h3><p>整理你的标签，读一封个人分析信。</p></div></li>
+        <li><span class="journey-icon peach">${uiIcon('heart')}</span><div><h3>遇见，慢慢熟悉</h3><p>从共同点开场，让关系慢慢生长。</p></div></li>
+      </ol>
+    </section>
+    <footer class="welcome-footer"><span>智遇 · SAGEMEET</span><span>先聊经历，再遇见人</span><small>交互演示 · 内容为示例</small></footer>
+  </div>`, 0);
 }
 
 /* Splash video: on desktop the cursor picks the frame whose recorded pupils
@@ -707,10 +719,10 @@ function agent() {
           <button type="button" aria-label="更多">＋</button>
           <input name="message" placeholder="想到什么就说什么…" autocomplete="off">
           <button type="button" data-a="voice" aria-label="语音">${ICON_MIC}</button>
-          <button type="button" class="composer-call" data-a="call" aria-label="打电话">
-            <span class="composer-call-ico">${ICON_PHONE}</span>
+          <button type="button" class="composer-call" data-a="call">
+            <span class="composer-call-ico">${ICON_CALL}</span>通话
           </button>
-          <button type="submit" class="composer-send" aria-label="发送"><span class="ico-send" aria-hidden="true"></span></button>
+          <button type="submit" class="composer-send">${ICON_SEND}发送</button>
         </form>
       </section>
       <aside class="side panel">
@@ -1028,7 +1040,7 @@ function chatPage() {
           <button type="button" aria-label="更多">＋</button>
           <input name="message" placeholder="和 ${p[0]} 说点什么…" autocomplete="off">
           <button type="button" data-a="voice" aria-label="语音">${ICON_MIC}</button>
-          <button type="submit" aria-label="发送"><span class="ico-send" aria-hidden="true"></span></button>
+          <button type="submit" class="composer-send">${ICON_SEND}发送</button>
         </form>
       </section>
       <aside class="side panel chat-side">
@@ -1083,10 +1095,10 @@ function xzConversation(strip) {
         <button type="button" aria-label="更多">＋</button>
         <input name="message" placeholder="和小知说点什么…" autocomplete="off">
         <button type="button" data-a="voice" aria-label="语音">${ICON_MIC}</button>
-        <button type="button" class="composer-call" data-a="call" aria-label="打电话">
-          <span class="composer-call-ico">${ICON_PHONE}</span>
+        <button type="button" class="composer-call" data-a="call">
+          <span class="composer-call-ico">${ICON_CALL}</span>通话
         </button>
-        <button type="submit" class="composer-send" aria-label="发送"><span class="ico-send" aria-hidden="true"></span></button>
+        <button type="submit" class="composer-send">${ICON_SEND}发送</button>
       </form>
     </section>
     <aside class="side panel chat-side">
