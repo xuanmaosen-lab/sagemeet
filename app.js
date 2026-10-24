@@ -748,7 +748,6 @@ function tags() {
 /* ——— Report/* ——— Report ——— */
 function report() {
   const name = who();
-  const peek = planeRow(people.slice(0, 8).map((p, i) => planeWindow(p, i)).join(''));
   return wrap(
     `<article class="report-letter fade-up">
       <header class="report-open" id="report-letter">
@@ -790,10 +789,6 @@ function report() {
           </div>
           <p>这些是你亲口说出的生活片段。它们比标签更接近真实的你。</p>
           <p class="footnote">⁴ 能量来源会随季节变化。</p>
-        </section>
-        <section class="profile-card panel report-card span-all">
-          <h2>接下来，也许你会想见他们</h2>
-          ${peek}
         </section>
       </div>
       <div class="page-cta">${btn('去遇见可能懂你的人', 'next')}</div>
@@ -902,6 +897,10 @@ function match() {
         <p class="match-peek-label">下面还有人 · 点选切换</p>
         <div class="match-peek-row">${peek}</div>
       </div>
+      <section class="profile-card panel report-card match-plane">
+        <h2>接下来，也许你会想见他们</h2>
+        ${planeRow(people.slice(0, 8).map((x, i) => planeWindow(x, i)).join(''))}
+      </section>
     </section>`,
     5
   );
