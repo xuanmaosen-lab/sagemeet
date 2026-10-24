@@ -90,6 +90,7 @@ const s = {
   ],
   active: [0, 1, 2], p: 0, friend: 0, sent: 0, unlocks: [],
   messages: [], /* agent-only thread */
+  xzChat: false, /* chat page shows the 小知 thread instead of a friend */
   threadsByFriend: {}, /* friendIndex -> messages[] */
   modal: '', unbind: 0,
   /* returning tab: xiaozhi | chat | recommend(遇见) | jingli(经历) */
@@ -137,6 +138,16 @@ function threadOf(fi) {
     s.threadsByFriend[key] = defaultThread(p);
   }
   return s.threadsByFriend[key];
+}
+function xiaozhiThread() {
+  if (!s.messages.length) {
+    s.messages = [
+      { from: 'agent', text: '你好，我是小知，会一直在这里听你说。最近一次让你觉得「这一刻真好」的时候，是在做什么？' },
+      { from: 'me', text: '上周末一个人去爬山，到山顶的时候风很大，突然觉得很轻松。' },
+      { from: 'agent', text: '那是一个属于你自己的时刻。你更喜欢一个人享受安静，还是也希望有人一起看？' },
+    ];
+  }
+  return s.messages;
 }
 function ensureActiveFriend() {
   if (!s.active.length) return;
@@ -303,6 +314,9 @@ function planeWindow(p, i) {
     <span class="plane-name">${p[0]} · ${p[2]}</span>
   </button>`;
 }
+
+const ICON_MIC = `<svg class="ico-svg" viewBox="0 0 162 237" aria-hidden="true" fill="currentColor"><rect x="36" y="0" width="90" height="150" rx="45"/><path d="M10 100a71 71 0 0 0 142 0M81 171v54M45 228h72" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"/></svg>`;
+const ICON_PHONE = `<svg class="ico-svg" viewBox="0 0 200 200" aria-hidden="true" fill="currentColor"><circle cx="48" cy="44" r="36"/><circle cx="156" cy="152" r="36"/><path d="M40 60C40 120 80 160 140 160" fill="none" stroke="currentColor" stroke-width="46" stroke-linecap="round"/></svg>`;
 
 function planeRow(list) {
   return `<div class="plane">
@@ -669,13 +683,7 @@ function treeholeCompose() {
 
 /* ——— Agent ——— */
 function agent() {
-  const m = s.messages.length
-    ? s.messages
-    : [
-        { from: 'agent', text: '你好，我是小知，会一直在这里听你说。最近一次让你觉得「这一刻真好」的时候，是在做什么？' },
-        { from: 'me', text: '上周末一个人去爬山，到山顶的时候风很大，突然觉得很轻松。' },
-        { from: 'agent', text: '那是一个属于你自己的时刻。你更喜欢一个人享受安静，还是也希望有人一起看？' },
-      ];
+  const m = xiaozhiThread();
   const sideMeta = s.mode === 'returning'
     ? '你的小树洞 · 随笔与秘密会记在这里'
     : '你的倾听伙伴 · 已聊 12 分钟';
@@ -698,12 +706,11 @@ function agent() {
         <form id="chat">
           <button type="button" aria-label="更多">＋</button>
           <input name="message" placeholder="想到什么就说什么…" autocomplete="off">
-          <button type="button" data-a="voice" aria-label="语音">🎙</button>
-          <button type="button" class="composer-call" data-a="call">
-            <span class="composer-call-ico">☎</span>
-            <span class="composer-call-label">打电话</span>
+          <button type="button" data-a="voice" aria-label="语音">${ICON_MIC}</button>
+          <button type="button" class="composer-call" data-a="call" aria-label="打电话">
+            <span class="composer-call-ico">${ICON_PHONE}</span>
           </button>
-          <button type="submit" class="composer-send" aria-label="发送">↑</button>
+          <button type="submit" class="composer-send" aria-label="发送"><span class="ico-send" aria-hidden="true"></span></button>
         </form>
       </section>
       <aside class="side panel">
@@ -871,17 +878,6 @@ function matchFeature(p, idx) {
 function match() {
   const full = s.active.length >= 10;
   const p = people[s.p % people.length];
-  const peek = people
-    .map((x, i) => {
-      if (i === s.p) return '';
-      return `<button type="button" class="peek-card ${i === s.p ? 'on' : ''}" data-person="${i}">
-        <div class="virt-wrap">${portraitFrame(x, { bust: true })}</div>
-        <em class="peek-pct">${matchPctOf(i)}%</em>
-        <span>${x[0]}</span>
-      </button>`;
-    })
-    .join('');
-
   return wrap(
     `<section class="match-stage fade-up">
       <div class="match-head">
@@ -893,10 +889,6 @@ function match() {
       </div>
       ${full ? `<p class="notice">名额已满。${link('管理好友', 'friends')}</p>` : ''}
       ${matchFeature(p, s.p)}
-      <div class="match-peek">
-        <p class="match-peek-label">下面还有人 · 点选切换</p>
-        <div class="match-peek-row">${peek}</div>
-      </div>
       <section class="profile-card panel report-card match-plane">
         <h2>接下来，也许你会想见他们</h2>
         ${planeRow(people.slice(0, 8).map((x, i) => planeWindow(x, i)).join(''))}
@@ -965,7 +957,7 @@ function chatPage() {
   const msgs = threadOf(fi);
   const friendRail = s.active.map((idx) => {
     const person = people[idx % people.length];
-    const on = idx === s.friend;
+    const on = !s.xzChat && idx === s.friend;
     const h = heatOf(idx);
     const open = isUnlocked(idx);
     const preview = (threadOf(idx).slice().reverse().find((m) => m.from !== 'me') || threadOf(idx).slice(-1)[0] || {}).text || '';
@@ -979,6 +971,15 @@ function chatPage() {
       ${on ? '<span class="chat-friend-dot" aria-hidden="true"></span>' : ''}
     </button>`;
   }).join('');
+  const xzLast = (xiaozhiThread().slice().reverse().find((m) => m.from === 'agent') || {}).text || '';
+  const xzShort = xzLast.length > 28 ? xzLast.slice(0, 28) + '…' : xzLast;
+  const strip = `<div class="chat-friend-strip" aria-label="切换会话">
+    <button type="button" class="chat-pill ${s.xzChat ? 'is-active' : ''}" data-a="chat-xiaozhi"><span class="mark mark-sm" aria-hidden="true"></span><span>小知</span></button>
+    ${s.active.map((idx) => {
+      const person = people[idx % people.length];
+      const on = !s.xzChat && idx === s.friend;
+      return `<button type="button" class="chat-pill ${on ? 'is-active' : ''}" data-open-friend="${idx}">${avatar(person, 28)}<span>${person[0]}</span></button>`;
+    }).join('')}</div>`;
 
   return wrap(
     `<section class="chat-shell fade-up">
@@ -991,11 +992,11 @@ function chatPage() {
           <span class="capacity meta">♥ ${s.active.length}/10</span>
         </div>
         <div class="chat-friend-list">
-          <button type="button" class="chat-friend chat-friend-pin" data-a="tab" data-tab="xiaozhi">
+          <button type="button" class="chat-friend chat-friend-pin ${s.xzChat ? 'is-active' : ''}" data-a="chat-xiaozhi" aria-current="${s.xzChat ? 'true' : 'false'}">
             <span class="mark mark-sm" aria-hidden="true"></span>
             <span class="chat-friend-copy">
               <b>小知</b>
-              <small class="meta">树洞首页 · 置顶</small>
+              <small class="meta">${xzShort}</small>
             </span>
             <span class="chat-pin-badge" aria-hidden="true">置顶</span>
           </button>
@@ -1003,7 +1004,7 @@ function chatPage() {
         </div>
         <div class="chat-rail-foot">${link('好友管理', 'friends')}</div>
       </aside>
-      <section class="conversation panel">
+      ${s.xzChat ? xzConversation(strip) : `<section class="conversation panel">
         <div class="friendhead">
           ${avatar(p, 44)}
           <div>
@@ -1012,11 +1013,7 @@ function chatPage() {
           </div>
           <button type="button" class="link friendhead-action" data-a="friends">管理</button>
         </div>
-        <div class="chat-friend-strip" aria-label="切换好友">${s.active.map((idx) => {
-          const person = people[idx % people.length];
-          const on = idx === s.friend;
-          return `<button type="button" class="chat-pill ${on ? 'is-active' : ''}" data-open-friend="${idx}">${avatar(person, 28)}<span>${person[0]}</span></button>`;
-        }).join('')}</div>
+        ${strip}
         <div class="messages">
           ${msgs.map((x) => `<p class="bubble ${x.from === 'them' ? 'them' : x.from}">${x.text}</p>`).join('')}
           ${u
@@ -1030,8 +1027,8 @@ function chatPage() {
         <form id="chat">
           <button type="button" aria-label="更多">＋</button>
           <input name="message" placeholder="和 ${p[0]} 说点什么…" autocomplete="off">
-          <button type="button" data-a="voice" aria-label="语音">🎙</button>
-          <button type="submit" aria-label="发送">↑</button>
+          <button type="button" data-a="voice" aria-label="语音">${ICON_MIC}</button>
+          <button type="submit" aria-label="发送"><span class="ico-send" aria-hidden="true"></span></button>
         </form>
       </section>
       <aside class="side panel chat-side">
@@ -1059,10 +1056,48 @@ function chatPage() {
         <p class="field-label">匹配度</p>
         <div class="match-badge">${matchPctOf(fi)}% 同频</div>
         <div class="side-foot">${btn('好友管理', 'friends')}</div>
-      </aside>
+      </aside>`}
     </section>`,
     6
   );
+}
+
+function xzConversation(strip) {
+  const toHome = s.mode === 'returning'
+    ? '<button type="button" class="link friendhead-action" data-a="tab" data-tab="xiaozhi">树洞首页</button>'
+    : '';
+  return `<section class="conversation panel">
+      <div class="friendhead">
+        <span class="mark mark-sm" aria-hidden="true"></span>
+        <div>
+          <b>小知</b>
+          <small class="meta">你的倾听伙伴 · 一直在</small>
+        </div>
+        ${toHome}
+      </div>
+      ${strip}
+      <div class="messages">${xiaozhiThread().map((x) => `<p class="bubble ${x.from}">${x.text}</p>`).join('')}</div>
+      <div class="suggest">${['今天有点累', '想聊聊刚认识的人', '换个轻松的话题']
+        .map((x) => `<button type="button" data-send="${x}">${x}</button>`).join('')}</div>
+      <form id="chat">
+        <button type="button" aria-label="更多">＋</button>
+        <input name="message" placeholder="和小知说点什么…" autocomplete="off">
+        <button type="button" data-a="voice" aria-label="语音">${ICON_MIC}</button>
+        <button type="button" class="composer-call" data-a="call" aria-label="打电话">
+          <span class="composer-call-ico">${ICON_PHONE}</span>
+        </button>
+        <button type="submit" class="composer-send" aria-label="发送"><span class="ico-send" aria-hidden="true"></span></button>
+      </form>
+    </section>
+    <aside class="side panel chat-side">
+      <div class="side-head">
+        <span class="mark" aria-hidden="true"></span>
+        <h2>小知</h2>
+      </div>
+      <p class="field-label">小知听见的关键词</p>
+      <div class="tag-row">${['独处充电', '山野', '真实', '慢热'].map(tag).join('')}</div>
+      <p class="meta">你和好友聊天时的心情，也可以随时回来跟小知说。</p>
+    </aside>`;
 }
 
 /* ——— Returning: 经历 ——— */
@@ -1277,7 +1312,7 @@ function callUI() {
     </div>
     <div class="call-controls">
       <button type="button" class="call-ctrl" data-a="call-mute" aria-label="静音"><span class="ico">🔇</span>静音</button>
-      <button type="button" class="call-ctrl hang" data-a="hangup" aria-label="挂断"><span class="ico">📞</span></button>
+      <button type="button" class="call-ctrl hang" data-a="hangup" aria-label="挂断"><span class="ico ico-hang">${ICON_PHONE}</span></button>
       <button type="button" class="call-ctrl" data-a="call-speaker" aria-label="免提"><span class="ico">🔊</span>免提</button>
     </div>
   </div>`;
@@ -1499,7 +1534,7 @@ app.addEventListener('click', (e) => {
     const t = x.dataset.tab;
     if (t) {
       s.tab = t;
-      if (t === 'chat') { s.page = 6; ensureActiveFriend(); if (s.active.length) threadOf(s.friend); }
+      if (t === 'chat') { s.page = 6; s.xzChat = false; ensureActiveFriend(); if (s.active.length) threadOf(s.friend); }
       else if (t === 'xiaozhi') { s.page = 2; s.treeholeView = 'home'; }
       else if (t === 'jingli') { s.page = 8; s.jingliView = 'home'; }
       else { s.page = 5; }
@@ -1513,7 +1548,7 @@ app.addEventListener('click', (e) => {
     const n = +x.dataset.page;
     if (n >= 1 && n <= 6) {
       s.page = n;
-      if (n === 6) { ensureActiveFriend(); if (s.active.length) threadOf(s.friend); }
+      if (n === 6) { s.xzChat = false; ensureActiveFriend(); if (s.active.length) threadOf(s.friend); }
     }
   } else if (x.dataset.age) { s.age = x.dataset.age; s.keepScroll = true; }
   else if (x.dataset.gender) { s.gender = x.dataset.gender; s.keepScroll = true; }
@@ -1534,6 +1569,7 @@ app.addEventListener('click', (e) => {
     );
   } else if (x.dataset.openFriend !== undefined) {
     s.friend = +x.dataset.openFriend;
+    s.xzChat = false;
     ensureActiveFriend();
     threadOf(s.friend);
     if (s.mode === 'returning') { s.tab = 'chat'; s.page = 6; }
@@ -1545,6 +1581,11 @@ app.addEventListener('click', (e) => {
     s.modal = 'unbind';
   } else
     switch (x.dataset.a) {
+      case 'chat-xiaozhi':
+        s.xzChat = true;
+        s.page = 6;
+        if (s.mode === 'returning') s.tab = 'chat';
+        break;
       case 'mode-new':
         endCall();
         s.mode = 'new';
@@ -1669,8 +1710,8 @@ app.addEventListener('click', (e) => {
         break;
       }
       case 'voice': {
-        const inFriendChat = s.page === 6 || (s.mode === 'returning' && s.tab === 'chat');
-        const line = { from: 'me', text: '🎙 语音消息 · 00:08' };
+        const inFriendChat = !s.xzChat && (s.page === 6 || (s.mode === 'returning' && s.tab === 'chat'));
+        const line = { from: 'me', text: `${ICON_MIC} 语音消息 · 00:08` };
         if (inFriendChat) {
           ensureActiveFriend();
           threadOf(s.friend).push(line);
@@ -1690,7 +1731,7 @@ app.addEventListener('submit', (e) => {
   if (e.target.id === 'chat') {
     const v = e.target.message.value.trim();
     if (!v) return;
-    const inFriendChat = s.page === 6 || (s.mode === 'returning' && s.tab === 'chat');
+    const inFriendChat = !s.xzChat && (s.page === 6 || (s.mode === 'returning' && s.tab === 'chat'));
     if (inFriendChat) {
       ensureActiveFriend();
       const t = threadOf(s.friend);
