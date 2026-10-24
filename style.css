@@ -190,71 +190,7 @@ img{display:block;max-width:100%}
   background:var(--ink);
 }
 
-/* ——— Splash ——— */
-/* Three-column layout keeps the reference's vw positions; type, colour and
-   pills follow the rest of the app. The warm video's top edge is #f8f1ea,
-   so the mobile background uses that instead of --paper to avoid a seam. */
-.sf-footer{
-  position:relative;min-height:100vh;padding-top:6.54vw;isolation:isolate;overflow:hidden;
-  color:var(--ink);background:var(--paper);cursor:pointer;outline:none;
-}
-.sf-jobs{margin-left:8.65vw;width:25vw}
-.sf-tag{
-  display:inline-flex;align-items:center;border-radius:var(--r-pill);
-  min-height:1.9vw;padding:max(5px,.39vw) max(12px,.8vw);
-  font-size:max(12px,.88vw);font-weight:500;line-height:1.2;letter-spacing:.02em;white-space:nowrap;
-  background:var(--glass-strong);color:var(--ink-soft);
-  box-shadow:var(--glass-inner), 0 0 0 1px var(--divider);
-}
-.sf-tag-cta{background:var(--ink);color:#fff;box-shadow:var(--shadow-btn)}
-.sf-headline{font-family:var(--font-display);font-weight:500;font-size:max(20px,2vw);line-height:1.3;letter-spacing:-.02em}
-.sf-job-title{display:block;margin-top:1.45vw}
-.sf-nav{display:flex;flex-direction:column;align-items:flex-start;gap:.93vw;margin-top:1.3vw;font-size:max(13px,1.075vw);line-height:1.35;color:var(--ink-soft)}
-.sf-logo{
-  position:absolute;left:40.33vw;top:7.7vw;width:17vw;
-  display:flex;align-items:center;justify-content:center;gap:.9vw;
-}
-.sf-logo .mark{--m:clamp(36px,3.4vw,60px);width:var(--m);height:var(--m)}
-.sf-logo .mark::before,.sf-logo .mark::after{width:calc(var(--m) * .4643);height:calc(var(--m) * .4643)}
-.sf-logo .mark::before{left:calc(var(--m) * .1786)}
-.sf-logo .mark::after{right:calc(var(--m) * .1786)}
-.sf-wordmark{
-  display:flex;flex-direction:column;
-  font-family:var(--font-display);font-size:clamp(28px,2.8vw,48px);font-weight:500;
-  letter-spacing:-.04em;line-height:1;
-}
-.sf-wordmark small{
-  font-family:var(--font-ui);font-size:max(10px,.7vw);font-weight:500;
-  letter-spacing:.28em;color:var(--ink-mute);margin-top:.45em;
-}
-.sf-contact{position:absolute;left:74.3vw;top:6.54vw;max-width:calc(25.7vw - 24px)}
-.sf-contact-links{display:flex;flex-direction:column;align-items:flex-start;margin-top:1.45vw;white-space:nowrap}
-.sf-note{margin:1.05vw 0 0;font-size:max(12px,.8vw);line-height:1.5;color:var(--ink-mute)}
-.sf-bg{position:absolute;inset:0;z-index:-1;pointer-events:none}
-.sf-bg video{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center}
-/* the fixed demo switch would collide with the top row below ~870px */
-@media(max-width:900px){body:has(.sf-footer) .mode-toggle{top:auto;bottom:14px}}
-
-@media(max-width:700px){
-  html:has(.sf-footer),body:has(.sf-footer){background:#f8f1ea}
-  .sf-footer{display:flex;flex-direction:column;gap:36px;min-height:100svh;padding:40px 24px 0;background:#f8f1ea}
-  .sf-logo{position:static;order:0;align-self:flex-start;justify-content:flex-start;width:auto;max-width:75%;gap:12px;margin-bottom:4px}
-  .sf-logo .mark{--m:44px}
-  .sf-wordmark{font-size:34px}
-  .sf-wordmark small{font-size:10px}
-  .sf-jobs{order:1;margin:0;width:100%}
-  .sf-tag{min-height:30px;padding:6px 12px;font-size:13px}
-  .sf-headline{font-size:clamp(22px,6.3vw,30px);line-height:1.3}
-  .sf-job-title,.sf-contact-links{margin-top:19px}
-  .sf-nav{display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin-top:20px;font-size:16px;line-height:1.4}
-  .sf-nav span{display:flex;align-items:center;min-height:44px}
-  .sf-contact{position:static;order:2;width:100%;max-width:none}
-  .sf-contact-links{gap:4px;white-space:normal}
-  .sf-note{max-width:34ch;margin:16px 0 0;font-size:13px;line-height:1.5}
-  .sf-bg{position:relative;inset:auto;order:3;z-index:auto;flex:none;align-self:center;width:calc(100% + 48px);aspect-ratio:4/3;margin-top:-16px}
-  .sf-bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
-}
-
+/* ——— Splash: see welcome.css ——— */
 .splash-band{padding:0 var(--page-pad) 80px;max-width:var(--page-max);margin:0 auto}
 .band-photo{
   position:relative;border-radius:var(--r-card-lg);overflow:hidden;
@@ -1105,33 +1041,36 @@ textarea.field{padding:14px 16px;line-height:1.6}
   background:rgba(248,224,216,.85);padding:2px 6px;border-radius:var(--r-pill);
 }
 #chat .composer-call{
-  display:inline-flex;align-items:center;justify-content:center;
-  padding:0;width:40px;height:40px;border-radius:50%;
-  background:linear-gradient(135deg,var(--blush-soft),rgba(248,224,216,.55));
-  box-shadow:var(--glass-inner), 0 0 0 1px rgba(216,104,72,.2);
-  font-size:12px;font-weight:500;color:var(--ink);white-space:nowrap;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:44px;padding:0 18px;border-radius:var(--r-inset);
+  background:var(--blush-soft);
+  box-shadow:inset 0 0 0 1px rgba(216,104,72,.45);
+  font-size:16px;font-weight:600;color:var(--terracotta);white-space:nowrap;flex-shrink:0;
+  transition:background .2s;
 }
-#chat .composer-call-ico{font-size:14px;line-height:1;display:inline-flex}
+#chat .composer-call:hover{background:var(--blush)}
+#chat .composer-call-ico{font-size:18px;line-height:1;display:inline-flex}
 .ico-svg{width:1em;height:1em;display:inline-block;vertical-align:-.125em;flex-shrink:0}
 #chat button[data-a="voice"]{font-size:18px}
 .bubble .ico-svg{width:.9em;height:.9em;margin-right:2px}
-.ico-send{
-  width:18px;height:18px;display:block;margin:auto;background:currentColor;
-  -webkit-mask:url(assets/icons/send.png) center/contain no-repeat;
-  mask:url(assets/icons/send.png) center/contain no-repeat;
-}
 /* handset laid flat = universal "hang up" glyph */
 .ico-hang{display:inline-flex;transform:rotate(135deg)}
-/* the send button IS the paper-plane shape: no circle behind it */
 #chat .composer-send,
-#chat button[type=submit],
-#chat button[type=submit].composer-send{
-  width:40px;height:40px;border-radius:0;padding:0;
-  background:transparent;color:var(--ink);flex-shrink:0;
-  box-shadow:none;transition:color .2s, transform .2s;
+#chat button[type=submit]{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:44px;padding:0 20px;border-radius:var(--r-inset);
+  background:var(--terracotta);color:#fff;flex-shrink:0;
+  font-size:16px;font-weight:600;white-space:nowrap;
+  box-shadow:0 4px 14px rgba(216,104,72,.28);transition:background .2s, transform .2s;
 }
-#chat button[type=submit] .ico-send{width:32px;height:32px}
-#chat button[type=submit]:hover{color:var(--terracotta);transform:translate(-1px,-1px)}
+#chat .composer-send .ico-svg{font-size:18px}
+#chat .composer-send:hover{background:var(--terracotta-deep);transform:translateY(-1px)}
+/* phones: the labelled buttons leave no room for typing, so the input takes its own row */
+@media (max-width:480px){
+  #chat{flex-wrap:wrap;row-gap:4px}
+  #chat input{order:-1;flex:1 0 100%;min-height:44px;padding:0 10px}
+  #chat .composer-call,#chat button[data-a=voice] + .composer-send{margin-left:auto}
+}
 .treehole,.treehole-compose{
   max-width:var(--page-max);margin:0 auto;
   padding:var(--page-pad-y) var(--page-pad) calc(var(--footer-h) + 32px);
