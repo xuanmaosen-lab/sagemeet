@@ -8,13 +8,15 @@
   --shadow-soft:0 14px 40px rgba(48,68,49,.07);
   --divider:rgba(41,62,52,.12);
   color:var(--ink);
+  /* #app is its own stacking context, so blend-mode images need a painted backdrop here */
+  background:#fbf8f2;
 }
 html:has(.welcome-page),body:has(.welcome-page){background:#fbf8f2}
 body:has(.welcome-page) .atmosphere{display:none}
 .welcome-page .btn{background:var(--sage-deep);color:#fff;box-shadow:0 5px 14px rgba(48,68,49,.10)}
 .welcome-page .btn:hover{transform:translateY(-2px);background:#294c38}
 .welcome-page .brand-lockup{color:var(--ink)}
-.welcome-header .brand-logo{width:34px;height:38px;flex-shrink:0;display:block}
+.welcome-logo{display:block;height:48px;width:auto}
 body:has(.welcome-page) .mode-toggle{top:24px;right:20px;padding:3px;background:#eeeede;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
 body:has(.welcome-page) .mode-toggle span{color:#667064}
 body:has(.welcome-page) .mode-toggle button{min-height:36px;padding:7px 13px;color:#667064}
@@ -95,7 +97,7 @@ body:has(.welcome-page) .mode-toggle button.on{background:#365e48;color:#fff;box
   .welcome-header{height:88px;padding-right:0}
   .welcome-header .brand-lockup{font-size:23px;gap:9px}
   .welcome-header .brand-lockup small{display:none}
-  .welcome-header .brand-logo{width:28px;height:31px}
+  .welcome-logo{height:40px}
   .welcome-nav{display:none}
   .welcome-hero{grid-template-columns:1fr;border-radius:28px;min-height:0}
   .welcome-copy{padding:36px 26px 0;align-self:start}
@@ -125,4 +127,8 @@ body:has(.welcome-page) .mode-toggle button.on{background:#365e48;color:#fff;box
 @media(prefers-reduced-motion:no-preference){
   .welcome-dialogue{animation:greeting-in .7s cubic-bezier(.22,1,.36,1) both}
   @keyframes greeting-in{from{transform:translateY(12px) rotate(-3deg)}to{transform:translateY(0) rotate(-5deg)}}
+}
+/* desktop: the hero fills the first screen so the next section stays below the fold */
+@media(min-width:701px){
+  .welcome-hero{min-height:max(540px,calc(100vh - 108px - 28px));min-height:max(540px,calc(100svh - 108px - 28px))}
 }

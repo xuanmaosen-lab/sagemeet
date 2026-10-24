@@ -426,7 +426,7 @@ textarea.field{padding:14px 16px;line-height:1.6}
   box-shadow:var(--shadow-card);
 }
 .friend-avatar img,.avatar-photo img{width:100%;height:100%;object-fit:cover}
-.friend-avatar .avatar-img{position:absolute;inset:0;object-position:50% 12%}
+.friend-avatar .avatar-img{position:absolute;inset:0;object-position:50% 30%}
 .friend-avatar .virt-mini{display:block;width:100%;height:100%}
 .call.mobile{display:none;margin:12px 16px 0;width:calc(100% - 32px)}
 @media (max-width:800px){.call.mobile{display:flex}.side .call{display:none}}
@@ -612,7 +612,7 @@ textarea.field{padding:14px 16px;line-height:1.6}
 .portrait-frame .virt-scene{position:absolute;inset:0;width:100%;height:100%}
 .portrait-frame img{
   position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;object-position:50% 12%;
+  object-fit:cover;object-position:50% 30%;
 }
 .photo-card .scrim{
   position:absolute;inset:0;
@@ -1141,3 +1141,5 @@ textarea.field{padding:14px 16px;line-height:1.6}
 .jingli-grid .option:hover{background:rgba(248,224,216,.85);box-shadow:var(--inset-ring)}
 .jingli-grid .option b{margin-bottom:0;font-size:14px}
 .jingli-grid .option small{font-size:11px;line-height:1.35}
+.chrome-logo{display:block;height:38px;width:auto}
+@media (max-width:860px){.chrome-logo{height:32px}}

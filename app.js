@@ -329,16 +329,6 @@ function planeRow(list) {
   </div>`;
 }
 
-/* "S" brand mark: one swoosh, the second is the same path turned 180°. */
-const BRAND_LOGO = `<svg class="brand-logo" viewBox="0 0 100 110" aria-hidden="true">
-  <defs>
-    <linearGradient id="logo-p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bca6f8"/><stop offset="1" stop-color="#7a59e0"/></linearGradient>
-    <linearGradient id="logo-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fa57c"/><stop offset="1" stop-color="#a9e5c6"/></linearGradient>
-  </defs>
-  <path fill="url(#logo-p)" d="M44 60C18 56 6 28 30 12C52 -2 92 2 95 24C97 38 86 45 77 41C69 37 64 31 54 31C40 31 33 46 44 60Z"/>
-  <path fill="url(#logo-g)" transform="rotate(180 50 55)" d="M44 60C18 56 6 28 30 12C52 -2 92 2 95 24C97 38 86 45 77 41C69 37 64 31 54 31C40 31 33 46 44 60Z"/>
-</svg>`;
-
 function uiIcon(name) {
   const paths = {
     arrow: '<path d="M4 12h15m-6-6 6 6-6 6"/>',
@@ -403,8 +393,7 @@ function returningChrome() {
   ).join('');
   return `<header class="chrome returning-chrome" aria-label="顶栏">
     <div class="brand-lockup">
-      <span class="mark mark-sm" aria-hidden="true"></span>
-      智遇 <small>SAGEMEET</small>
+      <img class="chrome-logo" src="assets/brand/sagemeet-logo.webp" alt="SageMeet 智遇" width="600" height="200">
     </div>
     <nav class="chapter-nav returning-topnav" aria-label="主站导航">${nav}</nav>
     <div class="chrome-right">
@@ -429,7 +418,7 @@ function wrap(body, chapterId) {
 function splash() {
   return wrap(`<div class="welcome-page">
     <header class="welcome-header">
-      <a class="brand-lockup" href="#" aria-label="智遇首页">${BRAND_LOGO}智遇 <small>SAGEMEET</small></a>
+      <a class="brand-lockup" href="#" aria-label="SageMeet 智遇首页"><img class="welcome-logo" src="assets/brand/sagemeet-logo.webp" alt="SageMeet 智遇" width="600" height="200"></a>
       <nav class="welcome-nav" aria-label="了解智遇"><a href="#how-it-works">怎样遇见</a><button type="button" data-a="mode-returning">回到我的树洞 ${uiIcon('arrow')}</button></nav>
     </header>
     <section class="welcome-hero" aria-labelledby="welcome-title">
@@ -1297,8 +1286,8 @@ function jingliDetail() {
         <p class="card-text">${d.body}</p>
       </div>
       <div class="page-cta">
-        ${btn('看完整报告', 'open-report-full')}
         ${btn('返回经历', 'jingli-home', 'secondary')}
+        ${btn('看完整报告', 'open-report-full')}
       </div>
     </section>`,
     0
