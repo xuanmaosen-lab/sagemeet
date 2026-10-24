@@ -14,10 +14,7 @@ body:has(.welcome-page) .atmosphere{display:none}
 .welcome-page .btn{background:var(--sage-deep);color:#fff;box-shadow:0 5px 14px rgba(48,68,49,.10)}
 .welcome-page .btn:hover{transform:translateY(-2px);background:#294c38}
 .welcome-page .brand-lockup{color:var(--ink)}
-.welcome-page .mark{border-radius:12px;background:transparent;box-shadow:none}
-.welcome-page .mark::before,.welcome-page .mark::after{width:68%;height:52%;border-radius:70% 30% 70% 30%;top:auto;opacity:1}
-.welcome-page .mark::before{left:4%;top:7%;background:#9c88c6;transform:rotate(-28deg)}
-.welcome-page .mark::after{left:auto;right:3%;bottom:7%;background:#86b397;transform:rotate(-28deg)}
+.welcome-header .brand-logo{width:34px;height:38px;flex-shrink:0;display:block}
 body:has(.welcome-page) .mode-toggle{top:24px;right:20px;padding:3px;background:#eeeede;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
 body:has(.welcome-page) .mode-toggle span{color:#667064}
 body:has(.welcome-page) .mode-toggle button{min-height:36px;padding:7px 13px;color:#667064}
@@ -54,6 +51,8 @@ body:has(.welcome-page) .mode-toggle button.on{background:#365e48;color:#fff;box
 .welcome-orbit{position:absolute;width:92%;height:80%;left:1%;top:12%;border-radius:48% 48% 42% 42%;background:#eadff0;transform:rotate(-9deg);z-index:-1}
 .welcome-art .sf-bg{position:absolute;left:0;top:16%;height:73%;width:94%;overflow:hidden;border-radius:48% 48% 44% 44%;background:#f8f1ea;z-index:0;pointer-events:none}
 .sf-bg video{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+/* white-ground render: multiply lets the arch colour show through the white */
+.welcome-mascot{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:88%;width:auto;max-width:none;mix-blend-mode:multiply;display:block}
 .welcome-garden{position:absolute;width:110%;max-width:none;height:auto;left:-7%;bottom:-4%;z-index:1;pointer-events:none}
 .welcome-dialogue{position:absolute;top:11%;left:4%;z-index:2;display:flex;align-items:center;gap:12px;background:var(--cream);padding:16px 24px;border-radius:19px 19px 19px 4px;box-shadow:var(--shadow-soft);transform:rotate(-5deg);font-size:15px}
 .welcome-dialogue small{display:block;margin-top:4px;color:var(--ink-mute);font-size:11px;letter-spacing:.08em}
@@ -96,7 +95,7 @@ body:has(.welcome-page) .mode-toggle button.on{background:#365e48;color:#fff;box
   .welcome-header{height:88px;padding-right:0}
   .welcome-header .brand-lockup{font-size:23px;gap:9px}
   .welcome-header .brand-lockup small{display:none}
-  .welcome-header .mark{width:30px;height:30px}
+  .welcome-header .brand-logo{width:28px;height:31px}
   .welcome-nav{display:none}
   .welcome-hero{grid-template-columns:1fr;border-radius:28px;min-height:0}
   .welcome-copy{padding:36px 26px 0;align-self:start}
