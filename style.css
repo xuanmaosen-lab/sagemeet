@@ -867,6 +867,7 @@ textarea.field{padding:14px 16px;line-height:1.6}
 .note-links{display:flex;gap:16px}
 
 .match-peek{margin-top:8px}
+.match-plane{margin-top:var(--gap)}
 .match-peek-label{font-size:13px;color:var(--ink-mute);margin:0 0 14px}
 .match-peek-row{display:flex;gap:14px;overflow-x:auto;padding:10px 10px 8px;scrollbar-width:none}
 .match-peek-row::-webkit-scrollbar{display:none}
