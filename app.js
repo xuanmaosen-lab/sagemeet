@@ -290,26 +290,31 @@ function virtSVG(p, opts = {}) {
   </svg>`;
 }
 
-/* Hand-drawn portrait (assets/people/pN.jpg) layered over the SVG figure;
-   the img removes itself on error, so people without a portrait keep the SVG */
+/* The 13 demo profiles share 10 restored portraits. Every surface uses this
+   mapping, so a window, chat avatar and recommendation always show one person. */
+const PORTRAIT_ART = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 3, 2, 4];
+const portraitSrc = (p, small = false) =>
+  `assets/people/hd/p${PORTRAIT_ART[p[5]]}${small ? '-small' : ''}.webp`;
+
+/* Keep the original SVG as a fallback if the restored image cannot load. */
 function portraitFrame(p, opts = {}) {
-  return `<span class="portrait-frame">${virtSVG(p, opts)}<img src="assets/people/p${p[5]}.jpg" alt="${p[0]}" loading="lazy" onerror="this.remove()"></span>`;
+  return `<span class="portrait-frame">${virtSVG(p, opts)}<img src="${portraitSrc(p)}" alt="${p[0]}" decoding="async" fetchpriority="high" onerror="this.remove()"></span>`;
 }
 
 function avatar(p, size = 40) {
   return `<span class="friend-avatar" style="width:${size}px;height:${size}px">
     <span class="virt-mini">${virtSVG(p, { mini: true })}</span>
-    <img class="avatar-img" src="assets/people/p${p[5]}.jpg" alt="" loading="lazy" onerror="this.remove()">
+    <img class="avatar-img" src="${portraitSrc(p, true)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">
   </span>`;
 }
 
-/* The illustration (assets/report/plane-meet.jpg) already contains the eight
-   portraits; each seat is an invisible hit area laid over one window, and its
-   position lives in CSS (.plane-seat:nth-child) next to the measured coordinates. */
+/* Empty aircraft windows receive the same portraits used by the profile cards.
+   Keep the measured frames, accessible names and click targets together. */
 function planeWindow(p, i) {
   const pct = matchPctOf(i);
   return `<button type="button" class="plane-seat" data-a="meet-person" data-i="${i}"
       aria-label="${p[0]}，${p[2]}，${p[1]} 岁，匹配度 ${pct}%">
+    <span class="plane-portrait" aria-hidden="true"><img src="${portraitSrc(p, true)}" alt="" loading="lazy" decoding="async"></span>
     <em class="plane-pct">${pct}%</em>
     <span class="plane-name">${p[0]} · ${p[2]}</span>
   </button>`;
@@ -323,7 +328,7 @@ const ICON_PHONE = `<svg class="ico-svg" viewBox="0 0 200 200" aria-hidden="true
 function planeRow(list) {
   return `<div class="plane">
     <div class="plane-scene">
-      <img src="assets/report/plane-meet.jpg" alt="" width="1942" height="809" loading="lazy">
+      <img class="plane-art" src="assets/report/plane-empty-hd.webp" alt="" width="1942" height="809" loading="lazy" decoding="async">
       ${list}
     </div>
   </div>`;
