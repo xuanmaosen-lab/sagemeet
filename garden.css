@@ -1,0 +1,129 @@
+/* Welcome and garden motifs. All imagery is local; core app tokens are shared. */
+.ui-icon{display:inline-block;flex-shrink:0;vertical-align:middle}
+.welcome-page{max-width:1440px;margin:auto;padding:0 clamp(20px,4.6vw,72px)}
+.welcome-header{height:108px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding-right:170px}
+.welcome-header .brand-lockup{font-size:27px;font-weight:600;gap:12px}
+.welcome-header .mark{width:36px;height:36px}
+.welcome-header .brand-lockup small{font-size:11px;letter-spacing:.16em}
+.welcome-nav{display:flex;align-items:center;gap:32px;font-size:14px;color:var(--ink-soft)}
+.welcome-nav a,.welcome-nav button{padding:12px 0;white-space:nowrap}
+.welcome-nav button{display:flex;align-items:center;gap:8px}
+.welcome-nav .ui-icon{width:18px;height:18px}
+.welcome-hero{position:relative;display:grid;grid-template-columns:1.08fr 1fr;min-height:600px;border-radius:36px;background:var(--peach);overflow:hidden}
+.welcome-copy{position:relative;z-index:2;padding:74px 0 66px clamp(32px,4.5vw,68px);align-self:center}
+.welcome-copy h1{font-family:var(--font-display);font-weight:600;font-size:clamp(32px,3.6vw,54px);line-height:1.5;letter-spacing:-.035em;margin:0 0 25px;white-space:nowrap}
+.welcome-copy h1 span{color:var(--sage-deep)}
+.welcome-intro{font-size:17px;line-height:1.9;color:var(--ink-soft);margin:0 0 30px}
+.welcome-cta{min-height:56px;gap:26px;padding:0 30px;font-size:16px}
+.welcome-cta .ui-icon{width:21px;height:21px;transition:transform .2s}
+.welcome-cta:hover .ui-icon{transform:translateX(4px)}
+.welcome-note{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:7px;margin:15px 0 0}
+.welcome-note .ui-icon{width:15px;height:15px}
+.welcome-detail{display:flex;gap:12px;align-items:center;margin-top:48px;font-size:12px;color:var(--ink-soft);letter-spacing:.12em}
+.detail-line{width:27px;height:1px;background:var(--sage)}
+.mobile-break{display:none}
+.welcome-art{position:relative;min-width:0;min-height:540px;isolation:isolate}
+.welcome-orbit{position:absolute;width:92%;height:80%;left:1%;top:12%;border-radius:48% 48% 42% 42%;background:#eadff0;transform:rotate(-9deg);z-index:-1}
+.welcome-art .sf-bg{position:absolute;left:0;top:16%;height:73%;width:94%;overflow:hidden;border-radius:48% 48% 44% 44%;background:#f8f1ea;z-index:0;pointer-events:none}
+.sf-bg video{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.welcome-garden{position:absolute;width:110%;max-width:none;height:auto;left:-7%;bottom:-4%;z-index:1;pointer-events:none}
+.welcome-dialogue{position:absolute;top:11%;left:4%;z-index:2;display:flex;align-items:center;gap:12px;background:var(--cream);padding:16px 24px;border-radius:19px 19px 19px 4px;box-shadow:var(--shadow-soft);transform:rotate(-5deg);font-size:15px}
+.welcome-dialogue small{display:block;margin-top:4px;color:var(--ink-mute);font-size:11px;letter-spacing:.08em}
+.dialogue-dot{width:12px;height:12px;background:var(--sage);border-radius:50%}
+.welcome-caption{position:absolute;z-index:3;bottom:14%;right:5%;display:flex;align-items:center;gap:14px;padding:16px 21px;border-radius:18px 18px 4px 18px;background:#e6ecdc;transform:rotate(6deg);font-family:var(--font-display);font-size:17px;box-shadow:var(--shadow-soft)}
+.welcome-caption .ui-icon{width:19px;height:19px;color:var(--sage-deep)}
+.welcome-journey{padding:58px 8px 56px;scroll-margin-top:20px}
+.journey-heading{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:28px}
+.journey-heading h2{font-family:var(--font-display);font-size:27px;letter-spacing:-.025em;font-weight:500;margin:0}
+.journey-heading p{font-size:13px;color:var(--ink-mute);margin:0}
+.journey-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;list-style:none;margin:0;padding:0}
+.journey-steps li{display:flex;align-items:center;gap:16px}
+.journey-icon{display:grid;place-items:center;width:52px;height:56px;border-radius:18px 18px 22px 8px;flex-shrink:0}
+.journey-icon .ui-icon{width:25px;height:25px}
+.journey-icon.lavender{background:var(--lavender);color:var(--lavender-deep)}
+.journey-icon.sage{background:var(--sage-wash);color:var(--sage-deep)}
+.journey-icon.peach{background:var(--blush);color:#985342}
+.journey-steps h3{font-size:15px;font-weight:600;margin:0 0 5px}
+.journey-steps p{font-size:12px;line-height:1.7;color:var(--ink-soft);margin:0}
+.welcome-footer{display:flex;align-items:center;gap:24px;justify-content:space-between;border-top:1px solid var(--divider);padding:24px 0 28px;font-size:11px;color:var(--ink-mute)}
+.welcome-footer small{font-size:11px}
+.form-progress{display:flex;align-items:center;gap:15px;font-size:12px;color:var(--sage-deep);margin:18px 0 0}
+.form-progress>span{display:flex;gap:4px}
+.form-progress i{display:block;width:34px;height:4px;background:#e0e5d9;border-radius:2px}
+.form-progress i.filled{background:var(--sage)}
+.garden-header{position:relative;overflow:hidden;background:var(--lavender);border-radius:var(--r-card-lg);padding:42px 40px;min-height:240px;isolation:isolate}
+.garden-header h1{max-width:70%;font-size:clamp(28px,3.2vw,40px);line-height:1.5;margin:0 0 14px}
+.garden-header .lede{max-width:58%;font-size:14px;line-height:1.9;margin:0}
+.header-garden{position:absolute;width:350px;height:auto;right:-15px;bottom:-44px;z-index:-1;pointer-events:none}
+.treehole,.treehole-compose{padding-bottom:48px}
+.treehole-action-icon{display:grid;place-items:center;width:48px;height:48px;flex-shrink:0;border-radius:16px;background:var(--sage-wash);color:var(--sage-deep)}
+.treehole-actions .option:nth-child(2) .treehole-action-icon{background:#f7e9bd;color:#7c651d}
+.treehole-actions .option:nth-child(3) .treehole-action-icon{background:var(--blush);color:#985342}
+.treehole-actions .option:nth-child(4) .treehole-action-icon{background:var(--lavender);color:var(--lavender-deep)}
+.report-context{font-size:12px;color:var(--ink-mute);margin:16px 0}
+@media(min-width:901px){
+  .treehole-actions{display:grid;grid-template-columns:1fr 1fr}
+  .treehole-actions .option{align-items:center;padding:24px;gap:20px}
+  .treehole-actions .option small{margin-top:5px}
+  .treehole-list{margin-top:32px;padding:32px}
+  .treehole-entries li{display:grid;grid-template-columns:90px 1fr;gap:24px;padding:22px 0}
+  .treehole-entries .entry-kind{justify-self:start;align-self:start;margin-top:4px}
+}
+@media(min-width:701px) and (max-width:1100px){
+  .welcome-nav>a{display:none}
+  .welcome-header{padding-right:170px}
+  .welcome-copy{padding-left:32px;padding-top:52px;padding-bottom:52px}
+  .welcome-copy h1{font-size:clamp(29px,3.5vw,40px)}
+  .welcome-intro{font-size:15px}
+  .welcome-hero{min-height:540px}
+  .welcome-art{min-height:540px}
+  .welcome-dialogue{font-size:13px;padding:14px 16px;left:0;top:14%}
+  .welcome-caption{font-size:14px;right:1%;bottom:15%;gap:8px;padding:12px 16px}
+  .journey-steps{gap:18px}
+  .journey-steps li{gap:12px;align-items:flex-start}
+  .journey-steps h3{font-size:14px}
+  .journey-icon{width:44px;height:48px}
+}
+@media(max-width:700px){
+  .mobile-break{display:initial}
+  .welcome-page{padding:0 16px}
+  .welcome-header{height:88px;padding-right:0}
+  .welcome-header .brand-lockup{font-size:23px;gap:9px}
+  .welcome-header .brand-lockup small{display:none}
+  .welcome-header .mark{width:30px;height:30px}
+  .welcome-nav{display:none}
+  .welcome-hero{grid-template-columns:1fr;border-radius:28px;min-height:0}
+  .welcome-copy{padding:36px 26px 0;align-self:start}
+  .welcome-copy h1{font-size:clamp(26px,7.1vw,40px);line-height:1.5;margin-bottom:17px;letter-spacing:-.04em}
+  .welcome-intro{font-size:14px;line-height:1.85;margin-bottom:22px}
+  .welcome-cta{min-height:52px;padding:0 24px;font-size:15px;gap:24px}
+  .welcome-note{font-size:11px;margin-top:13px;gap:5px}
+  .welcome-note .ui-icon{width:14px;height:14px}
+  .welcome-detail{display:none}
+  .welcome-art{min-height:340px;height:85vw;max-height:430px;margin-top:8px}
+  .welcome-art .sf-bg{left:10%;width:81%;top:13%;height:82%}
+  .welcome-orbit{left:12%;width:79%;height:82%;top:9%}
+  .welcome-dialogue{top:8%;left:8%;padding:12px 17px;font-size:12px;gap:9px}
+  .welcome-dialogue small{font-size:10px;margin-top:2px}
+  .dialogue-dot{width:8px;height:8px}
+  .welcome-garden{width:106%;left:-2%;bottom:-7%}
+  .welcome-caption{font-size:13px;right:5%;bottom:17%;padding:12px 16px;gap:10px}
+  .welcome-journey{padding:38px 12px 34px}
+  .journey-heading{display:block;margin-bottom:24px}
+  .journey-heading h2{font-size:25px;margin-bottom:9px}
+  .journey-steps{grid-template-columns:1fr;gap:23px}
+  .journey-steps li{gap:17px}
+  .journey-steps p{font-size:12px}
+  .welcome-footer{flex-wrap:wrap;gap:10px;padding:20px 10px}
+  .welcome-footer small{width:100%;font-size:10px}
+  .garden-header{padding:29px 24px 125px;min-height:0}
+  .garden-header h1{max-width:none;font-size:27px;line-height:1.4}
+  .garden-header .lede{max-width:none;font-size:13px}
+  .header-garden{width:260px;bottom:-55px;right:-10px}
+  .treehole-actions .option{align-items:center;padding:20px;gap:16px}
+  .treehole-action-icon{width:43px;height:46px;border-radius:14px}
+}
+@media(prefers-reduced-motion:no-preference){
+  .welcome-dialogue{animation:greeting-in .7s cubic-bezier(.22,1,.36,1) both}
+  @keyframes greeting-in{from{transform:translateY(12px) rotate(-3deg)}to{transform:translateY(0) rotate(-5deg)}}
+}

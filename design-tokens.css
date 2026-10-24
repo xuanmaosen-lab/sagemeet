@@ -1,82 +1,66 @@
 :root{
-  /* Ground & warm wash — v0.5 */
-  --paper:#f6f1ea;
-  --paper-deep:#efe6db;
-  --peach:#f3d5c4;
-  --blush:#f8e0d8;
-  --blush-soft:#faf0ea;
-  --sage-wash:#e2ebe3;
-  --cream:#fbf6ef;
-
-  /* Ink */
-  --ink:#282018;
-  --ink-soft:rgba(40,32,24,.72);
-  --ink-mute:rgba(40,32,24,.48);
-  --ink-faint:rgba(40,32,24,.28);
-  --ink-ghost:rgba(40,32,24,.10);
-
-  /* Accents */
-  --terracotta:#d86848;
-  --terracotta-deep:#b85238;
-  --coral:#e8725a;
-  --coral-hot:#e85a48;
-  --olive:#7a8a5a;
-  --sage:#789880;
-  --sage-deep:#5e7a68;
-  --white:#ffffff;
-
-  /* Liquid glass */
-  --glass:rgba(255,255,255,.55);
-  --glass-strong:rgba(255,255,255,.72);
-  --glass-tint:rgba(255,244,236,.48);
-  --glass-rim:rgba(255,255,255,.40);
-  --glass-inner:inset 0 1px 0 rgba(255,255,255,.65), inset 0 -1px 0 rgba(90,50,30,.04);
-  --glass-fringe:0 0 0 1px rgba(255,200,170,.18);
-
-  /* Elevations — layered warm, NO hairline gray borders */
-  --shadow-soft:0 1px 1px rgba(40,24,16,.04), 0 18px 50px rgba(90,50,30,.10);
-  --shadow-card:0 1px 1px rgba(40,24,16,.04), 0 12px 36px rgba(90,50,30,.08);
-  --shadow-float:0 2px 2px rgba(40,24,16,.05), 0 24px 64px rgba(90,50,30,.14);
-  --shadow-btn:0 6px 20px rgba(40,24,16,.18);
-
-  /* Type */
+  /* SageMeet — a warm, botanical palette shared by every app flow. */
+  --paper:#fbf8f2;
+  --paper-deep:#f0eade;
+  --peach:#f7e4d5;
+  --blush:#f5e0da;
+  --blush-soft:#f6eee7;
+  --sage-wash:#e4eddf;
+  --cream:#fffdf8;
+  --lavender:#eae3f5;
+  --lavender-deep:#69568d;
+  --ink:#293e34;
+  --ink-soft:#526357;
+  --ink-mute:#667064;
+  --ink-faint:#71796d;
+  --ink-ghost:rgba(41,62,52,.12);
+  --terracotta:#50765e;
+  --terracotta-deep:#365b44;
+  --coral:#cb7c68;
+  --coral-hot:#a65a48;
+  --olive:#7a8b5c;
+  --sage:#52745d;
+  --sage-deep:#365e48;
+  --white:#fff;
+  --glass:#fffdf8;
+  --glass-strong:#fffdf9;
+  --glass-tint:#f7f1e8;
+  --glass-rim:transparent;
+  --glass-inner:0 0 0 transparent;
+  --glass-fringe:0 0 0 transparent;
+  --shadow-soft:0 14px 40px rgba(48,68,49,.07);
+  --shadow-card:0 8px 24px rgba(48,68,49,.04);
+  --shadow-float:0 20px 60px rgba(48,68,49,.12);
+  --shadow-btn:0 5px 14px rgba(48,68,49,.10);
   --font-display:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
   --font-ui:"Noto Sans SC","PingFang SC","Helvetica Neue",sans-serif;
-
-  /* Radii — three levels only: card / inset / pill */
   --r-pill:999px;
   --r-card:24px;
-  --r-inset:16px;
+  --r-inset:14px;
   --r-control:var(--r-inset);
-  --r-card-lg:var(--r-card);
+  --r-card-lg:32px;
   --r-note:var(--r-card);
-  --r-squircle:22px;
-
-  /* Card surface — every top-level card uses the same recipe */
-  --card-bg:rgba(255,251,247,.78);
-  --card-bg-solid:#fdf9f5;
-  --card-bg-hover:rgba(255,253,250,.92);
-  --card-border:1px solid var(--glass-rim);
-  --card-shadow:var(--glass-inner), var(--shadow-card);
-  --card-shadow-hover:var(--glass-inner), var(--shadow-soft);
-  --card-blur:blur(16px) saturate(1.15);
+  --r-squircle:20px;
+  --card-bg:#fffdf9;
+  --card-bg-solid:#fffdf9;
+  --card-bg-hover:#f4f5ec;
+  --card-border:0;
+  --card-shadow:none;
+  --card-shadow-hover:none;
+  --card-blur:none;
   --card-title:22px;
-
-  /* Inset block — anything nested inside a card */
-  --inset-bg:var(--blush-soft);
-  --inset-ring:inset 0 0 0 1px rgba(216,104,72,.10);
-  --divider:rgba(40,24,16,.07);
-
-  /* Layout */
-  --chrome-h:64px;
-  --tabbar-h:68px;
+  --inset-bg:#f1f3e9;
+  --inset-ring:inset 0 0 0 1px rgba(54,94,72,.08);
+  --divider:rgba(41,62,52,.12);
+  --chrome-h:80px;
+  --tabbar-h:76px;
   --footer-h:88px;
   --measure:40rem;
   --page-pad:clamp(20px,4vw,40px);
-  --page-pad-y:24px;
-  --page-max:1180px;
-  --gap:16px;
-  --gap-inset:10px;
-  --pad-card:clamp(20px,4vw,24px);
-  --pad-inset:14px 16px;
+  --page-pad-y:40px;
+  --page-max:1220px;
+  --gap:22px;
+  --gap-inset:12px;
+  --pad-card:clamp(20px,3vw,28px);
+  --pad-inset:16px 18px;
 }

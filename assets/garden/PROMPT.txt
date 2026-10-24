@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: transparent botanical illustration for the SageMeet web app.
+Primary request: A beautiful elegant botanical garden cluster, landscape 3:2 composition, with curling sage-green leaves, mint stems, small lavender and purple cosmos or daisies, and a few soft coral bell blossoms. Plants rise gracefully from the lower edge, with airy organic contours and abundant clear negative space in the center and upper area.
+Style/medium: Sophisticated editorial gouache and layered paper-cut illustration; soft flat shapes with subtle hand-painted texture, gentle friendly mood, inspired by calm botanical self-care app artwork. Restrained silhouette and slender stem rhythms, graceful leaf shapes, polished illustration quality.
+Composition/framing: Landscape 3:2 canvas. Botanical foliage clusters across the bottom with a little more height at the sides, gently framing an open center; the upper third is mostly empty transparent space. No objects besides the botanical plants.
+Color palette: Muted sage and mint green foliage, lavender and plum-purple petals, a few dusty coral-pink blossoms.
+Scene/backdrop: Actual transparent alpha background, no background color, no painted paper rectangle.
+Constraints: Transparent PNG is mandatory. No pots, no people, no ground or landscape, no text, no logos, no UI, no icons, no border, no watermark, no checkerboard baked into image. Do not fill the negative space with decorative marks.

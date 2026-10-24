@@ -71,7 +71,7 @@ const MATCH_PCT = [92, 88, 84, 81, 79, 76, 91, 86, 83, 78, 90, 85, 74];
 
 const CHAPTERS = [
   { id: 1, label: '1. 基础信息' },
-  { id: 2, label: '2. Agent 交流' },
+  { id: 2, label: '2. 小知陪聊' },
   { id: 3, label: '3. 我的标签' },
   { id: 4, label: '4. 分析报告' },
   { id: 5, label: '5. 知音推荐' },
@@ -113,12 +113,16 @@ const s = {
   /* call */
   callPhase: '', /* '' | connecting | active */
   callSeconds: 0,
+  callMuted: false, callSpeaker: false,
   heatByFriend: {}, /* friendIndex -> message count */
 };
 
 let callTimer = null;
 
 const app = document.querySelector('#app');
+/* Keep state as plain text; escape only at the HTML output boundary. */
+const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const who = () => (s.name && String(s.name).trim()) || '你';
 const photo = (p, w = 800) => U(PHOTOS[p[5] % PHOTOS.length], w);
 const virtOf = (p) => VIRT[p[5] % VIRT.length];
@@ -176,7 +180,10 @@ const btn = (t, a, c = '') =>
   `<button type="button" class="btn ${c}" data-a="${a}">${t}</button>`;
 const link = (t, a) =>
   `<button type="button" class="link" data-a="${a}">${t}</button>`;
-const tag = (t) => `<i class="tag">#${t}</i>`;
+const tag = (t) => `<i class="tag">#${escapeHTML(t)}</i>`;
+const messageHTML = (message) => message.kind === 'voice'
+  ? `${ICON_MIC} ${escapeHTML(message.text)}`
+  : escapeHTML(message.text);
 
 /* ——— Illustrated virtual persona (SVG composition) ——— */
 function virtSVG(p, opts = {}) {
@@ -327,11 +334,25 @@ function planeRow(list) {
   </div>`;
 }
 
+function uiIcon(name) {
+  const paths = {
+    arrow: '<path d="M4 12h15m-6-6 6 6-6 6"/>',
+    clock: '<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>',
+    chat: '<path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-3 3V12a8 8 0 0 1 16-1"/><path d="M7 10h6m-6 4h9"/>',
+    leaf: '<path d="M5 18C0 6 13 3 21 3c0 11-4 17-12 16M4 21 15 10"/>',
+    heart: '<path d="M20 5c-3-3-7-1-8 1-1-2-5-4-8-1-4 4 1 9 8 15 7-6 12-11 8-15Z"/>',
+    book: '<path d="M12 5v15M3 4c4-1 6 0 9 2 3-2 5-3 9-2v14c-4-1-6 0-9 2-3-2-5-3-9-2Z"/>',
+    lock: '<rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1 1m12 12 1 1M5 19l1-1M18 6l1-1"/>',
+  };
+  return `<svg class="ui-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.leaf}</svg>`;
+}
+
 function modeToggle() {
   return `<div class="mode-toggle" role="group" aria-label="演示模式">
     <span>演示</span>
-    <button type="button" class="${s.mode === 'new' ? 'on' : ''}" data-a="mode-new">新客</button>
-    <button type="button" class="${s.mode === 'returning' ? 'on' : ''}" data-a="mode-returning">老客</button>
+    <button type="button" class="${s.mode === 'new' ? 'on' : ''}" data-a="mode-new" aria-pressed="${s.mode === 'new'}">新客</button>
+    <button type="button" class="${s.mode === 'returning' ? 'on' : ''}" data-a="mode-returning" aria-pressed="${s.mode === 'returning'}">老客</button>
   </div>`;
 }
 
@@ -340,7 +361,7 @@ function chrome(activeId) {
   if (s.mode === 'returning') return '';
   const nav = CHAPTERS.map((c) => {
     const on = c.id === activeId ? ' on' : '';
-    return `<button type="button" class="${on.trim()}" data-a="goto" data-page="${c.id}">${c.label}</button>`;
+    return `<button type="button" class="${on.trim()} ${c.id < activeId ? 'completed' : ''}" aria-current="${c.id === activeId ? 'step' : 'false'}" data-a="goto" data-page="${c.id}">${c.label}</button>`;
   }).join('');
   return `<header class="chrome">
     <div class="brand-lockup">
@@ -355,18 +376,18 @@ function chrome(activeId) {
 }
 
 const RETURNING_TABS = [
-  ['xiaozhi', '✦', '小知'],
-  ['chat', '◎', '聊天'],
-  ['recommend', '○', '遇见'],
-  ['jingli', '◇', '经历'],
+  ['xiaozhi', 'leaf', '小知'],
+  ['chat', 'chat', '聊天'],
+  ['recommend', 'heart', '遇见'],
+  ['jingli', 'book', '经历'],
 ];
 
 function tabbar() {
   if (s.mode !== 'returning') return '';
   return `<nav class="tabbar" aria-label="主站导航">
     ${RETURNING_TABS.map(([id, ico, label]) =>
-      `<button type="button" class="${s.tab === id ? 'on' : ''}" data-a="tab" data-tab="${id}">
-        <span class="tab-ico">${ico}</span>${label}
+      `<button type="button" class="${s.tab === id ? 'on' : ''}" aria-current="${s.tab === id ? 'page' : 'false'}" data-a="tab" data-tab="${id}">
+        <span class="tab-ico">${uiIcon(ico)}</span>${label}
       </button>`
     ).join('')}
   </nav>`;
@@ -376,7 +397,7 @@ function returningChrome() {
   if (s.mode !== 'returning' || s.page === 0) return '';
   const initial = (who()[0] || '我');
   const nav = RETURNING_TABS.map(([id, , label]) =>
-    `<button type="button" class="${s.tab === id ? 'on' : ''}" data-a="tab" data-tab="${id}">${label}</button>`
+    `<button type="button" class="${s.tab === id ? 'on' : ''}" aria-current="${s.tab === id ? 'page' : 'false'}" data-a="tab" data-tab="${id}">${label}</button>`
   ).join('');
   return `<header class="chrome returning-chrome" aria-label="顶栏">
     <div class="brand-lockup">
@@ -386,7 +407,7 @@ function returningChrome() {
     <nav class="chapter-nav returning-topnav" aria-label="主站导航">${nav}</nav>
     <div class="chrome-right">
       <button type="button" class="cap me-entry" data-a="me" aria-label="我的账号">
-        <span class="me-avatar" aria-hidden="true">${initial}</span>我
+        <span class="me-avatar" aria-hidden="true">${escapeHTML(initial)}</span>我
       </button>
     </div>
   </header>`;
@@ -404,38 +425,37 @@ function wrap(body, chapterId) {
 
 /* ——— Splash ——— */
 function splash() {
-  const back = s.mode === 'returning';
-  const action = back ? 'enter-returning' : 'start';
-  const copy = back
-    ? { tag: '点击任意处进入', l1: '欢迎回来', l2: '进入智遇*', note: '*老客模式 · 小知 · 聊天 · 遇见 · 经历' }
-    : { tag: '点击任意处开始', l1: '和小知聊聊天', l2: '遇见懂你的人*', note: '*大约 8 分钟 · 你说的每句话都只属于你' };
-  return wrap(`<footer class="sf-footer" aria-label="智遇开屏" data-a="${action}" tabindex="0">
-    <div class="sf-bg" aria-hidden="true">
-      <video muted playsinline preload="auto" src="assets/splash/footer-warm-720.mp4"></video>
-    </div>
-    <div class="sf-jobs">
-      <span class="sf-tag">先聊经历，再遇见人</span>
-      <span class="sf-headline sf-job-title">用真实的人生经历，<br>遇见同频的你。</span>
-      <div class="sf-nav">
-        <span>小知</span>
-        <span>聊天</span>
-        <span>遇见</span>
-        <span>经历</span>
+  return wrap(`<div class="welcome-page">
+    <header class="welcome-header">
+      <a class="brand-lockup" href="#" aria-label="智遇首页"><span class="mark mark-sm" aria-hidden="true"></span>智遇 <small>SAGEMEET</small></a>
+      <nav class="welcome-nav" aria-label="了解智遇"><a href="#how-it-works">怎样遇见</a><button type="button" data-a="mode-returning">回到我的树洞 ${uiIcon('arrow')}</button></nav>
+    </header>
+    <section class="welcome-hero" aria-labelledby="welcome-title">
+      <div class="welcome-copy">
+        <h1 id="welcome-title">用真实的人生经历，<br>遇见<span>同频的你。</span></h1>
+        <p class="welcome-intro">先聊经历，再遇见人。<br>和小知聊聊天，让每一次靠近，<br class="mobile-break">都从被理解开始。</p>
+        <button type="button" class="btn welcome-cta" data-a="start">和小知聊聊 ${uiIcon('arrow')}</button>
+        <p class="welcome-note">${uiIcon('clock')} 大约 8 分钟，从一个小故事开始</p>
+        <div class="welcome-detail"><span class="detail-line"></span> 小知 · 聊天 · 遇见 · 经历</div>
       </div>
-    </div>
-    <div class="sf-logo" role="img" aria-label="智遇 Sagemeet">
-      <span class="mark" aria-hidden="true"></span>
-      <span class="sf-wordmark" aria-hidden="true">智遇<small>SAGEMEET</small></span>
-    </div>
-    <div class="sf-contact">
-      <span class="sf-tag sf-tag-cta">${copy.tag}</span>
-      <div class="sf-headline sf-contact-links">
-        <span>${copy.l1}</span>
-        <span>${copy.l2}</span>
+      <div class="welcome-art">
+        <div class="welcome-orbit" aria-hidden="true"></div>
+        <div class="sf-bg"><video muted playsinline preload="metadata" src="assets/splash/footer-warm-720.mp4" aria-label="抱着爱心的小知玩偶"></video></div>
+        <div class="welcome-dialogue"><span class="dialogue-dot" aria-hidden="true"></span><span>你好呀，我是小知<small>你的倾听伙伴</small></span></div>
+        <img class="welcome-garden" src="assets/garden/botanical-garden.png" alt="" width="1536" height="1024" aria-hidden="true">
+        <div class="welcome-caption">慢慢说，我在听。${uiIcon('heart')}</div>
       </div>
-      <p class="sf-note">${copy.note}</p>
-    </div>
-  </footer>`, 0);
+    </section>
+    <section class="welcome-journey" id="how-it-works" aria-labelledby="journey-title">
+      <div class="journey-heading"><h2 id="journey-title">让相遇，自然发生。</h2><p>从认识自己，到认识聊得来的人。</p></div>
+      <ol class="journey-steps">
+        <li><span class="journey-icon lavender">${uiIcon('chat')}</span><div><h3>先和小知聊一聊</h3><p>从日常和经历里，慢慢认识自己。</p></div></li>
+        <li><span class="journey-icon sage">${uiIcon('leaf')}</span><div><h3>看见独一无二的你</h3><p>整理你的标签，读一封个人分析信。</p></div></li>
+        <li><span class="journey-icon peach">${uiIcon('heart')}</span><div><h3>遇见，慢慢熟悉</h3><p>从共同点开场，让关系慢慢生长。</p></div></li>
+      </ol>
+    </section>
+    <footer class="welcome-footer"><span>智遇 · SAGEMEET</span><span>先聊经历，再遇见人</span><small>交互演示 · 内容为示例</small></footer>
+  </div>`, 0);
 }
 
 /* Splash video: on desktop the cursor picks the frame whose recorded pupils
@@ -489,7 +509,7 @@ function mountSplashVideo(video) {
 
   const seek = () => {
     frame = 0;
-    if (disposed || mobile.matches || video.readyState < 2 || video.seeking) return;
+    if (disposed || reducedMotion.matches || mobile.matches || video.readyState < 2 || video.seeking) return;
     if (Math.abs(video.currentTime - desiredTime) > 1 / 48) {
       video.currentTime = Math.min(desiredTime, video.duration - 1 / 24);
     }
@@ -498,7 +518,7 @@ function mountSplashVideo(video) {
     if (!frame) frame = requestAnimationFrame(seek);
   };
   const updateTarget = () => {
-    if (mobile.matches || !pointer) return;
+    if (reducedMotion.matches || mobile.matches || !pointer) return;
     const rect = video.getBoundingClientRect();
     const scale = Math.max(rect.width / 1920, rect.height / 1080);
     // eye midpoint (948,418) in the 1920×1080 source, mapped through object-fit: cover
@@ -556,30 +576,30 @@ function onboarding() {
   return wrap(
     `<section class="onboard-shell${anim}">
       <header class="onboard-head">
-        <p class="eyebrow">基础信息 · 已选 ${done} / 3</p>
+
         <h1>先简单认识一下你</h1>
-        <p class="lede">三个小问题，选最接近的就好，之后都可以改。</p>
+        <p class="lede">三个小问题，选最接近的就好，之后都可以改。</p><p class="form-progress">已选 ${done} / 3 <span aria-hidden="true">${[1,2,3].map(n => `<i class="${n <= done ? 'filled' : ''}"></i>`).join('')}</span></p>
       </header>
       <div class="card-grid">
         <section class="profile-card panel">
           <h2>你的性别是？</h2>
           <p class="meta">选一个即可，之后可以改。</p>
           <div class="chips seg">${GENDERS.map((x) =>
-            `<button type="button" class="chip ${s.gender === x ? 'selected' : ''}" data-gender="${x}">${x}</button>`
+            `<button type="button" class="chip ${s.gender === x ? 'selected' : ''}" aria-pressed="${s.gender === x}" data-gender="${x}">${x}</button>`
           ).join('')}</div>
         </section>
         <section class="profile-card panel">
           <h2>你的年龄段</h2>
           <p class="meta">选一个最接近的就好。</p>
           <div class="chips seg">${AGES.map((x) =>
-            `<button type="button" class="chip ${s.age === x ? 'selected' : ''}" data-age="${x}">${x}</button>`
+            `<button type="button" class="chip ${s.age === x ? 'selected' : ''}" aria-pressed="${s.age === x}" data-age="${x}">${x}</button>`
           ).join('')}</div>
         </section>
         <section class="profile-card panel span-all">
           <h2>最近的你，更像哪一种状态？</h2>
           <p class="meta">选一个最接近的，没有对错。</p>
           <div class="moods">${MOODS.map(([title, sub]) =>
-            `<button type="button" class="option ${s.mood === title ? 'selected' : ''}" data-mood="${title}">
+            `<button type="button" class="option ${s.mood === title ? 'selected' : ''}" aria-pressed="${s.mood === title}" data-mood="${title}">
               <span class="radio">${s.mood === title ? '✓' : ''}</span>
               <span><b>${title}</b><small>${sub}</small></span>
             </button>`
@@ -587,7 +607,7 @@ function onboarding() {
         </section>
       </div>
       <div class="page-cta">
-        ${btn('去和 Agent 聊聊', 'onext')}
+        ${btn('去和小知聊聊', 'onext')}
         ${btn('‹ 上一步', 'oback', 'secondary')}
       </div>
     </section>`,
@@ -618,15 +638,15 @@ function treeholeHome() {
   ];
   return wrap(
     `<section class="treehole fade-up">
-      <header class="treehole-head">
-        <p class="eyebrow">小知 · 你的树洞</p>
-        <h1>${name}，把心里话放这里</h1>
+      <header class="treehole-head garden-header">
+        <img class="header-garden" src="assets/garden/botanical-garden.png" alt="" width="1536" height="1024" aria-hidden="true">
+        <h1>${escapeHTML(name)}，把心里话放这里</h1>
         <p class="lede">日记、日常、小秘密都会被小知记得，帮你更准地被理解；等亲密度够了，再挑选一段去交换。</p>
       </header>
       <div class="treehole-actions moods">
         ${actions.map(([id, title, sub]) =>
           `<button type="button" class="option" data-a="treehole-${id}">
-            <span class="radio" aria-hidden="true"></span>
+            <span class="treehole-action-icon" aria-hidden="true">${uiIcon({diary:'book',daily:'sun',secret:'lock',chat:'chat'}[id])}</span>
             <span><b>${title}</b><small>${sub}</small></span>
           </button>`
         ).join('')}
@@ -641,9 +661,9 @@ function treeholeHome() {
               `<li>
                 <span class="entry-kind">${entryKindLabel(e.kind)}</span>
                 <div>
-                  <b>${e.title}</b>
-                  <p>${e.body}</p>
-                  <small class="meta">${e.at}</small>
+                  <b>${escapeHTML(e.title)}</b>
+                  <p>${escapeHTML(e.body)}</p>
+                  <small class="meta">${escapeHTML(e.at)}</small>
                 </div>
               </li>`
             ).join('')}</ul>`
@@ -700,12 +720,12 @@ function agent() {
             <span class="meta">${sideMeta}</span>
           </div>
         </div>
-        <div class="messages">${m.map((x) => `<p class="bubble ${x.from}">${x.text}</p>`).join('')}</div>
+        <div class="messages">${m.map((x) => `<p class="bubble ${x.from}">${messageHTML(x)}</p>`).join('')}</div>
         <div class="suggest">${['我其实两种都想要', '想聊聊最近的困扰', '换个轻松的话题']
           .map((x) => `<button type="button" data-send="${x}">${x}</button>`).join('')}</div>
         <form id="chat">
-          <button type="button" aria-label="更多">＋</button>
-          <input name="message" placeholder="想到什么就说什么…" autocomplete="off">
+          <button type="button" data-a="chat-help" aria-label="聊天功能说明">＋</button>
+          <input name="message" aria-label="消息内容" placeholder="想到什么就说什么…" autocomplete="off">
           <button type="button" data-a="voice" aria-label="语音">${ICON_MIC}</button>
           <button type="button" class="composer-call" data-a="call" aria-label="打电话">
             <span class="composer-call-ico">${ICON_PHONE}</span>
@@ -734,15 +754,15 @@ function tags() {
         .map(
           (x, i) =>
             `<article>
-              <b>#${x[0]}</b>
-              <p>「${x[1]}」</p>
+              <b>#${escapeHTML(x[0])}</b>
+              <p>「${escapeHTML(x[1])}」</p>
               <button type="button" data-edit="${i}" aria-label="编辑">✎</button>
               <button type="button" data-del="${i}" aria-label="删除">×</button>
             </article>`
         )
         .join('')}
         <form id="newtag">
-          <input name="tag" placeholder="添加一个标签" autocomplete="off">
+          <input name="tag" aria-label="新标签" placeholder="添加一个标签" autocomplete="off">
           <button type="submit" aria-label="添加">＋</button>
         </form>
       </div>
@@ -758,14 +778,14 @@ function report() {
   return wrap(
     `<article class="report-letter fade-up">
       <header class="report-open" id="report-letter">
-        <p class="kicker eyebrow">基于你的表达整理 · 不是诊断</p>
-        <h1>${name}的个人画像</h1>
+
+        <h1>${escapeHTML(name)}的个人画像</h1>
         <p class="lede">一个在安静里积蓄温度的人。你重视真诚，也愿意把靠近的节奏交给时间。</p>
-        <div class="report-tags">${s.tags.map((x) => tag(x[0])).join('')}</div>
+        <p class="report-context">基于你的表达整理 · 不是诊断</p><div class="report-tags">${s.tags.map((x) => tag(x[0])).join('')}</div>
       </header>
       <div class="card-grid">
         <section class="profile-card panel report-card">
-          <h2 id="report-values">你重视什么<span class="paren">(01)</span></h2>
+          <h2 id="report-values">你重视什么</h2>
           <div class="values-typo">
             <b>真实坦诚</b><b>内心自由</b><b>深度连接</b><b>自然与身体</b><b>新鲜体验</b>
           </div>
@@ -774,13 +794,13 @@ function report() {
           <p class="footnote">¹ 由对话关键词与兴趣选择整理，演示数据。</p>
         </section>
         <section class="profile-card panel report-card">
-          <h2 id="report-connect">你如何与人建立连接<span class="paren">(02)</span></h2>
+          <h2 id="report-connect">你如何与人建立连接</h2>
           <p>你像是慢慢升温的人。一开始话不多，但一旦觉得安全，会给出很多真诚和耐心。</p>
           <p>初识时你观察多于表达；熟悉之后，你会记得对方随口说过的细节，并把它们变成下一次见面的温暖。</p>
           <p class="footnote">² 连接用文字呈现，而非仪表盘。</p>
         </section>
         <section class="profile-card panel report-card">
-          <h2>你可能欣赏怎样的人<span class="paren">(03)</span></h2>
+          <h2>你可能欣赏怎样的人</h2>
           <ul class="num-list">
             <li><span class="big">一</span><span>愿意认真听你说完一句话</span></li>
             <li><span class="big">二</span><span>有自己热爱的小事</span></li>
@@ -789,7 +809,7 @@ function report() {
           <p class="footnote">³ 欣赏不等于筛选标准，只是方向。</p>
         </section>
         <section class="profile-card panel report-card">
-          <h2 id="report-energy">你的能量从哪里来<span class="paren">(04)</span></h2>
+          <h2 id="report-energy">你的能量从哪里来</h2>
           <div class="energy-cloud">
             <b>山顶的风</b><span>一个人的周末</span><b>好的对话</b>
             <span>旧书店</span><span>热汤</span><b>被记住的细节</b>
@@ -966,7 +986,7 @@ function chatPage() {
       ${avatar(person, 44)}
       <span class="chat-friend-copy">
         <b>${person[0]}</b>
-        <small class="meta">${open ? '✦ 真照' : '虚拟 · 热度 ' + h}/${HEAT_UNLOCK} · ${short}</small>
+        <small class="meta">${open ? '✦ 真照' : '虚拟 · 热度 ' + h}/${HEAT_UNLOCK} · ${escapeHTML(short)}</small>
       </span>
       ${on ? '<span class="chat-friend-dot" aria-hidden="true"></span>' : ''}
     </button>`;
@@ -996,7 +1016,7 @@ function chatPage() {
             <span class="mark mark-sm" aria-hidden="true"></span>
             <span class="chat-friend-copy">
               <b>小知</b>
-              <small class="meta">${xzShort}</small>
+              <small class="meta">${escapeHTML(xzShort)}</small>
             </span>
             <span class="chat-pin-badge" aria-hidden="true">置顶</span>
           </button>
@@ -1015,18 +1035,18 @@ function chatPage() {
         </div>
         ${strip}
         <div class="messages">
-          ${msgs.map((x) => `<p class="bubble ${x.from === 'them' ? 'them' : x.from}">${x.text}</p>`).join('')}
+          ${msgs.map((x) => `<p class="bubble ${x.from === 'them' ? 'them' : x.from}">${messageHTML(x)}</p>`).join('')}
           ${u
-            .filter((x) => heat >= x[2] || s.unlocks.includes(x[2]))
+            .filter((x) => heat >= x[2])
             .map(
               (x) =>
-                `<article class="unlock"><b>解锁：${x[0]}</b><button type="button">${x[1]}</button></article>`
+                `<article class="unlock"><b>解锁：${x[0]}</b><p>${x[1]}</p></article>`
             )
             .join('')}
         </div>
         <form id="chat">
-          <button type="button" aria-label="更多">＋</button>
-          <input name="message" placeholder="和 ${p[0]} 说点什么…" autocomplete="off">
+          <button type="button" data-a="chat-help" aria-label="聊天功能说明">＋</button>
+          <input name="message" aria-label="消息内容" placeholder="和 ${p[0]} 说点什么…" autocomplete="off">
           <button type="button" data-a="voice" aria-label="语音">${ICON_MIC}</button>
           <button type="submit" aria-label="发送"><span class="ico-send" aria-hidden="true"></span></button>
         </form>
@@ -1076,12 +1096,12 @@ function xzConversation(strip) {
         ${toHome}
       </div>
       ${strip}
-      <div class="messages">${xiaozhiThread().map((x) => `<p class="bubble ${x.from}">${x.text}</p>`).join('')}</div>
+      <div class="messages">${xiaozhiThread().map((x) => `<p class="bubble ${x.from}">${messageHTML(x)}</p>`).join('')}</div>
       <div class="suggest">${['今天有点累', '想聊聊刚认识的人', '换个轻松的话题']
         .map((x) => `<button type="button" data-send="${x}">${x}</button>`).join('')}</div>
       <form id="chat">
-        <button type="button" aria-label="更多">＋</button>
-        <input name="message" placeholder="和小知说点什么…" autocomplete="off">
+        <button type="button" data-a="chat-help" aria-label="聊天功能说明">＋</button>
+        <input name="message" aria-label="消息内容" placeholder="和小知说点什么…" autocomplete="off">
         <button type="button" data-a="voice" aria-label="语音">${ICON_MIC}</button>
         <button type="button" class="composer-call" data-a="call" aria-label="打电话">
           <span class="composer-call-ico">${ICON_PHONE}</span>
@@ -1148,7 +1168,7 @@ function jingliHome() {
   return wrap(
     `<section class="content fade-up">
       <p class="eyebrow">经历 · 越聊越具象的你</p>
-      <h1>${name}的经历</h1>
+      <h1>${escapeHTML(name)}的经历</h1>
       <p class="lede">小知把你写下的日记、秘密和聊天，收成一份越来越像你的画像。</p>
 
       <div class="card-grid">
@@ -1159,7 +1179,7 @@ function jingliHome() {
         <div class="chips">
           ${showTags.map((t) => {
             const focus = (s.focusTags || []).includes(t);
-            return `<button type="button" class="chip ${focus ? 'interest selected' : 'selected'}" data-a="jingli-tags">${t}${focus ? ' · 侧重' : ''}</button>`;
+            return `<button type="button" class="chip ${focus ? 'interest selected' : 'selected'}" data-a="jingli-tags">${escapeHTML(t)}${focus ? ' · 侧重' : ''}</button>`;
           }).join('')}
           <button type="button" class="chip" data-a="jingli-tags">编辑标签</button>
         </div>
@@ -1215,7 +1235,7 @@ function jingliTags() {
         <div class="chips">
           ${all.map((t) => {
             const on = (s.matchTags || []).includes(t);
-            return `<button type="button" class="chip ${on ? 'selected' : ''}" data-a="toggle-match-tag" data-tag="${t}">${t}</button>`;
+            return `<button type="button" class="chip ${on ? 'selected' : ''}" data-a="toggle-match-tag" aria-pressed="${on}" data-tag="${escapeHTML(t)}">${escapeHTML(t)}</button>`;
           }).join('')}
         </div>
         <p class="selected-count">已选 ${(s.matchTags || []).length} 个</p>
@@ -1228,7 +1248,7 @@ function jingliTags() {
           ${(s.matchTags || []).length
             ? (s.matchTags || []).map((t) => {
                 const on = (s.focusTags || []).includes(t);
-                return `<button type="button" class="chip interest ${on ? 'selected' : ''}" data-a="toggle-focus-tag" data-tag="${t}">${t}</button>`;
+                return `<button type="button" class="chip interest ${on ? 'selected' : ''}" data-a="toggle-focus-tag" aria-pressed="${on}" data-tag="${escapeHTML(t)}">${escapeHTML(t)}</button>`;
               }).join('')
             : '<p class="meta">先在上面勾选用于匹配的标签</p>'}
         </div>
@@ -1299,9 +1319,9 @@ function callUI() {
     phase === 'connecting'
       ? `正在接通<em>.</em><em>.</em><em>.</em>`
       : '通话中';
-  return `<div class="call-screen fade-up" role="dialog" aria-label="与小知通话">
+  return `<div class="call-screen fade-up" role="dialog" aria-modal="true" aria-label="与小知通话（演示）" tabindex="-1">
     <div class="call-top">
-      <p class="call-brand">SAGEMEET · 语音</p>
+      <p class="call-brand">SAGEMEET · 语音演示</p>
       <h2 class="call-name">小知</h2>
       <p class="call-status connecting-status">${status}</p>
       ${phase === 'active' ? `<p class="call-timer">${fmtTime(s.callSeconds)}</p>` : ''}
@@ -1311,9 +1331,9 @@ function callUI() {
       <div class="call-avatar ${phase === 'active' ? 'call-portrait-live' : ''}">${virtSVG(agentPersona, { bust: true })}</div>
     </div>
     <div class="call-controls">
-      <button type="button" class="call-ctrl" data-a="call-mute" aria-label="静音"><span class="ico">🔇</span>静音</button>
+      <button type="button" class="call-ctrl" data-a="call-mute" aria-pressed="${s.callMuted}" aria-label="${s.callMuted ? '取消静音' : '静音'}"><span class="ico">🔇</span>${s.callMuted ? '已静音' : '静音'}</button>
       <button type="button" class="call-ctrl hang" data-a="hangup" aria-label="挂断"><span class="ico ico-hang">${ICON_PHONE}</span></button>
-      <button type="button" class="call-ctrl" data-a="call-speaker" aria-label="免提"><span class="ico">🔊</span>免提</button>
+      <button type="button" class="call-ctrl" data-a="call-speaker" aria-pressed="${s.callSpeaker}" aria-label="${s.callSpeaker ? '关闭免提' : '开启免提'}"><span class="ico">🔊</span>${s.callSpeaker ? '免提已开' : '免提'}</button>
     </div>
   </div>`;
 }
@@ -1322,6 +1342,8 @@ function startCall() {
   stopCallTimer();
   s.callPhase = 'connecting';
   s.callSeconds = 0;
+  s.callMuted = false;
+  s.callSpeaker = false;
   s.modal = '';
   render();
   setTimeout(() => {
@@ -1353,13 +1375,13 @@ function endCall() {
 function modal() {
   if (s.modal === 'me') {
     const name = who();
-    return `<div class="overlay"><article class="modal">
+    return `<div class="overlay"><article class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
       <button type="button" data-a="close" aria-label="关闭">×</button>
-      <h2>我</h2>
+      <h2 id="modal-title">我</h2>
       <p class="lede">账号与设置（轻量入口，演示）</p>
       <div class="inset-card">
-        <div class="info-row"><p class="meta">昵称</p><b>${name}</b></div>
-        <div class="info-row"><p class="meta">性别 · 年龄 · 状态</p><b>${s.gender || '未选'} · ${s.age} · ${s.mood}</b></div>
+        <div class="info-row"><p class="meta">昵称</p><b>${escapeHTML(name)}</b></div>
+        <div class="info-row"><p class="meta">性别 · 年龄 · 状态</p><b>${escapeHTML(s.gender || '未选')} · ${escapeHTML(s.age)} · ${escapeHTML(s.mood)}</b></div>
       </div>
       <div class="modal-actions">
         ${btn('关闭', 'close', 'wide')}
@@ -1369,15 +1391,17 @@ function modal() {
   const title =
     s.modal === 'unbind'
       ? '解除这位好友的绑定？'
-      : '个人资料';
+      : s.modal === 'chat-help' ? '慢慢说，我在听' : '个人资料';
   const body =
     s.modal === 'unbind'
       ? '解除后名额会释放，你之后仍可重新认识对方。'
-      : '演示资料卡：虚拟形象相遇，聊到热度后解锁真实照片。';
-  return `<div class="overlay"><article class="modal">
+      : s.modal === 'chat-help'
+        ? '你可以输入消息，也可以试试语音和通话的演示。当前不会录音或拨出真实电话。'
+        : '演示资料卡：虚拟形象相遇，聊到热度后解锁真实照片。';
+  return `<div class="overlay"><article class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
     <button type="button" data-a="close" aria-label="关闭">×</button>
-    <h2>${title}</h2>
-    <p class="lede">${body}</p>
+    <h2 id="modal-title">${escapeHTML(title)}</h2>
+    <p class="lede">${escapeHTML(body)}</p>
     ${btn(s.modal === 'unbind' ? '确认解除' : '关闭', s.modal === 'unbind' ? 'confirm' : 'close')}
   </article></div>`;
 }
@@ -1389,17 +1413,73 @@ function bumpHeat(friendIdx) {
   }
 }
 
+/* A render replaces the view, so keep unfinished writing and keyboard position
+   in memory. Drafts are separated by conversation; nothing is persisted. */
+const drafts = new Map();
+let renderedView = '';
+let renderedDialog = false;
+let dialogReturnFocus = null;
+let focusComposer = false;
+let scrollMessages = false;
+const focusableSelector = 'button:not([disabled]),a[href],input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex="0"]';
+
+function viewKey() {
+  return [s.mode, s.page, s.mode === 'returning' ? s.tab : '',
+    s.page === 2 ? s.treeholeView + ':' + s.composeKind : '',
+    s.page === 6 ? (s.xzChat ? 'xiaozhi' : s.friend) : '',
+    s.page === 8 ? s.jingliView + ':' + s.jingliInsight + ':' + s.jingliDetail : ''].join('/');
+}
+
+function describeFocus(element) {
+  if (!element || !app.contains(element)) return null;
+  const attributes = Array.from(element.attributes);
+  const hasIdentity = attributes.some((a) => a.name === 'id' || a.name === 'name' || a.name.startsWith('data-'));
+  const attrs = attributes.filter((a) =>
+    a.name === 'id' || a.name === 'name' || a.name === 'type' ||
+    (!hasIdentity && a.name === 'aria-label') || a.name.startsWith('data-'))
+    .map((a) => [a.name, a.value]);
+  return { tag: element.tagName, attrs, form: element.form?.id || '',
+    start: element.selectionStart, end: element.selectionEnd, direction: element.selectionDirection };
+}
+
+function restoreFocus(description, root = app) {
+  if (!description) return false;
+  const element = Array.from(root.querySelectorAll(description.tag)).find((candidate) =>
+    (candidate.form?.id || '') === description.form &&
+    candidate.getClientRects().length > 0 &&
+    description.attrs.every(([name, value]) => candidate.getAttribute(name) === value));
+  if (!element) return false;
+  element.focus({ preventScroll: true });
+  if (typeof description.start === 'number' && element.setSelectionRange) {
+    element.setSelectionRange(description.start, description.end, description.direction || 'none');
+  }
+  return true;
+}
+
 function render() {
+  const oldFocus = describeFocus(document.activeElement);
+  const previousScroll = { x: window.scrollX, y: window.scrollY };
+  const previousMessages = app.querySelector('.messages')?.scrollTop || 0;
+  if (renderedView) {
+    drafts.set(renderedView, Array.from(app.querySelectorAll('form input[name],form textarea[name]')).map((field) =>
+      ({ form: field.form.id, name: field.name, value: field.value })));
+  }
+  const nextView = viewKey();
+  const changedView = renderedView !== nextView;
+  const hasDialog = Boolean(s.modal || s.callPhase);
+  if (hasDialog && !renderedDialog) dialogReturnFocus = oldFocus;
+  if (unmountSplashVideo) unmountSplashVideo();
+  unmountSplashVideo = null;
   if (s.mode === 'returning') {
     let body;
     if (s.page === 7) body = friends();
     else if (s.page === 0 && s.tab === undefined) body = splash();
+    else if (s.page === 4) body = report();
     else if (s.tab === 'xiaozhi') {
       if (s.treeholeView === 'chat') body = agent();
       else if (s.treeholeView === 'compose') body = treeholeCompose();
       else body = treeholeHome();
     }
-    else if (s.page === 4) body = report();
     else if (s.tab === 'chat' || s.page === 6) body = chatPage();
     else if (s.tab === 'jingli') {
       if (s.jingliView === 'tags') body = jingliTags();
@@ -1411,12 +1491,50 @@ function render() {
     app.innerHTML = body;
   } else {
     const pages = [splash, onboarding, agent, tags, report, match, chatPage, friends];
-    app.innerHTML = pages[s.page]();
+    app.innerHTML = (pages[s.page] || splash)();
   }
-  if (s.keepScroll) s.keepScroll = false;
+  for (const draft of drafts.get(nextView) || []) {
+    const field = Array.from(app.querySelectorAll('form input[name],form textarea[name]')).find((candidate) =>
+      candidate.form.id === draft.form && candidate.name === draft.name);
+    if (field) field.value = draft.value;
+  }
+  const dialog = app.querySelector('[role="dialog"]');
+  if (dialog) {
+    for (const child of app.children) {
+      if (child !== dialog && !child.contains(dialog)) child.inert = true;
+    }
+    document.body.style.overflow = 'hidden';
+    if (!renderedDialog || !restoreFocus(oldFocus, dialog)) {
+      (dialog.querySelector(focusableSelector) || dialog).focus({ preventScroll: true });
+    }
+  } else {
+    document.body.style.overflow = '';
+    if (renderedDialog) {
+      restoreFocus(dialogReturnFocus);
+      dialogReturnFocus = null;
+    } else if (focusComposer) {
+      app.querySelector('#chat input[name="message"]')?.focus({ preventScroll: true });
+    } else if (!changedView) {
+      restoreFocus(oldFocus);
+    } else if (renderedView) {
+      const heading = app.querySelector('h1,main');
+      if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true }); }
+    }
+  }
+  if (s.keepScroll || !changedView) window.scrollTo(previousScroll.x, previousScroll.y);
   else window.scrollTo(0, 0);
-  if (unmountSplashVideo) unmountSplashVideo();
-  unmountSplashVideo = null;
+  const chapterNav = app.querySelector('.chapter-nav');
+  const activeChapter = chapterNav?.querySelector('[aria-current="step"]');
+  if (activeChapter && chapterNav.scrollWidth > chapterNav.clientWidth) {
+    chapterNav.scrollLeft = Math.max(0, activeChapter.offsetLeft - chapterNav.offsetLeft - (chapterNav.clientWidth - activeChapter.offsetWidth) / 2);
+  }
+  const messages = app.querySelector('.messages');
+  if (messages) messages.scrollTop = scrollMessages || changedView ? messages.scrollHeight : previousMessages;
+  renderedView = nextView;
+  renderedDialog = hasDialog;
+  s.keepScroll = false;
+  focusComposer = false;
+  scrollMessages = false;
   const splashVideo = app.querySelector('.sf-bg video');
   if (splashVideo) {
     splashVideo.muted = true;
@@ -1425,13 +1543,33 @@ function render() {
 }
 
 app.addEventListener('keydown', (e) => {
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('sf-footer')) {
+  const dialog = app.querySelector('[role="dialog"]');
+  if (dialog && e.key === 'Escape') {
+    e.preventDefault();
+    if (s.callPhase) endCall();
+    s.modal = '';
+    render();
+    return;
+  }
+  if (dialog && e.key === 'Tab') {
+    const controls = Array.from(dialog.querySelectorAll(focusableSelector));
+    const first = controls[0] || dialog;
+    const last = controls[controls.length - 1] || dialog;
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && (document.activeElement === last || document.activeElement === dialog)) {
+      e.preventDefault(); first.focus();
+    }
+  }
+  if ((e.key === 'Enter' || e.key === ' ') &&
+      (e.target.classList.contains('sf-footer') || e.target.matches('[role="button"][data-a]'))) {
     e.preventDefault();
     e.target.click();
   }
 });
 
 app.addEventListener('click', (e) => {
+  if (e.target.classList.contains('overlay')) { s.modal = ''; render(); return; }
   const x = e.target.closest(
     '[data-a],[data-page],[data-age],[data-gender],[data-mood],[data-interest],[data-send],[data-person],[data-del],[data-edit],[data-unbind],[data-tab],[data-open-friend],[data-insight],[data-detail],[data-tag]'
   );
@@ -1567,6 +1705,8 @@ app.addEventListener('click', (e) => {
       { from: 'me', text: x.dataset.send },
       { from: 'agent', text: '谢谢你愿意说这些，可以多讲一点吗？' }
     );
+    focusComposer = true;
+    scrollMessages = true;
   } else if (x.dataset.openFriend !== undefined) {
     s.friend = +x.dataset.openFriend;
     s.xzChat = false;
@@ -1668,9 +1808,14 @@ app.addEventListener('click', (e) => {
         endCall();
         break;
       case 'call-mute':
+        s.callMuted = !s.callMuted;
+        break;
       case 'call-speaker':
-        /* decorative */
-        return;
+        s.callSpeaker = !s.callSpeaker;
+        break;
+      case 'chat-help':
+        s.modal = 'chat-help';
+        break;
       case 'close':
         s.modal = '';
         break;
@@ -1711,7 +1856,7 @@ app.addEventListener('click', (e) => {
       }
       case 'voice': {
         const inFriendChat = !s.xzChat && (s.page === 6 || (s.mode === 'returning' && s.tab === 'chat'));
-        const line = { from: 'me', text: `${ICON_MIC} 语音消息 · 00:08` };
+        const line = { from: 'me', kind: 'voice', text: '语音消息 · 00:08（演示）' };
         if (inFriendChat) {
           ensureActiveFriend();
           threadOf(s.friend).push(line);
@@ -1720,6 +1865,8 @@ app.addEventListener('click', (e) => {
         } else {
           s.messages.push(line);
         }
+        focusComposer = true;
+        scrollMessages = true;
         break;
       }
     }
@@ -1729,7 +1876,8 @@ app.addEventListener('click', (e) => {
 app.addEventListener('submit', (e) => {
   e.preventDefault();
   if (e.target.id === 'chat') {
-    const v = e.target.message.value.trim();
+    const input = e.target.elements.namedItem('message');
+    const v = input.value.trim();
     if (!v) return;
     const inFriendChat = !s.xzChat && (s.page === 6 || (s.mode === 'returning' && s.tab === 'chat'));
     if (inFriendChat) {
@@ -1738,18 +1886,21 @@ app.addEventListener('submit', (e) => {
       t.push({ from: 'me', text: v });
       s.sent++;
       bumpHeat(s.friend);
-      [1, 3, HEAT_UNLOCK].forEach((n) => {
-        if (heatOf(s.friend) >= n && !s.unlocks.includes(n)) s.unlocks.push(n);
-      });
       t.push({ from: 'them', text: '感觉和你聊天很放松。' });
     } else {
       s.messages.push({ from: 'me', text: v });
       s.messages.push({ from: 'agent', text: '谢谢你愿意分享。我在认真听。' });
     }
+    input.value = '';
+    focusComposer = true;
+    scrollMessages = true;
   }
   if (e.target.id === 'newtag') {
     const v = new FormData(e.target).get('tag')?.trim();
-    if (v) s.tags.push([v, '补充的自我描述']);
+    if (v) {
+      s.tags.push([v, '补充的自我描述']);
+      e.target.elements.namedItem('tag').value = '';
+    }
   }
   if (e.target.id === 'treehole-compose') {
     const fd = new FormData(e.target);
@@ -1773,6 +1924,7 @@ app.addEventListener('submit', (e) => {
     );
     s.treeholeView = 'home';
     s.composeKind = '';
+    e.target.reset();
   }
   render();
 });
@@ -1794,44 +1946,46 @@ app.addEventListener('submit', (e) => {
     ];
   }
 
-render();
-
+/* Apply preview parameters before the first render. Tab links select the
+   returning experience; malformed or fractional page/heat values are ignored. */
 (() => {
   const q = new URLSearchParams(window.location.search);
-  if (q.get('mode') === 'returning') {
+  const requestedTab = q.get('tab') === 'profile' ? 'jingli' : q.get('tab');
+  const validTab = RETURNING_TABS.some(([id]) => id === requestedTab);
+  if (q.get('mode') === 'returning' || validTab) {
     s.mode = 'returning';
-    s.page = 2;
-    s.tab = 'xiaozhi';
-    s.treeholeView = 'home';
-    s.name = s.name || '小满';
-    if (!s.active.length) s.active = [0, 1, 2];
+    s.tab = validTab ? requestedTab : 'xiaozhi';
+    s.page = { xiaozhi: 2, chat: 6, jingli: 8, recommend: 5 }[s.tab];
+    s.name = '小满';
+    if (s.tab === 'xiaozhi') s.treeholeView = q.get('view') === 'chat' ? 'chat' : 'home';
   }
-  if (q.get('tab') === 'chat' || q.get('tab') === 'jingli' || q.get('tab') === 'profile' || q.get('tab') === 'recommend' || q.get('tab') === 'xiaozhi') {
-    s.tab = q.get('tab') === 'profile' ? 'jingli' : q.get('tab');
-    if (s.tab === 'chat') { s.page = 6; }
-    else if (s.tab === 'xiaozhi') { s.page = 2; s.treeholeView = q.get('view') === 'chat' ? 'chat' : 'home'; }
-    else if (s.tab === 'jingli') { s.page = 8; }
-    else { s.page = 5; }
-  }
-  if (!q.has('page') && !q.has('mode') && !q.has('call') && !q.has('heat')) return;
   if (q.has('page')) {
-    const n = +q.get('page');
-    if (Number.isFinite(n) && n >= 0 && n <= 7) s.page = n;
+    const page = Number(q.get('page'));
+    if (Number.isInteger(page) && page >= 0 && page <= (s.mode === 'returning' ? 8 : 7)) {
+      s.page = page;
+      if (s.mode === 'returning') {
+        if (page === 0) s.tab = undefined;
+        else if (page === 2) s.tab = 'xiaozhi';
+        else if (page === 5) s.tab = 'recommend';
+        else if (page === 6) s.tab = 'chat';
+        else if (page === 8) s.tab = 'jingli';
+      }
+    }
   }
   if (q.get('name')) s.name = q.get('name');
-  if (q.get('heat')) {
-    const h = +q.get('heat');
-    s.heatByFriend[s.p] = h;
-    s.heatByFriend[s.friend] = h;
+  if (q.has('heat')) {
+    const heat = Number(q.get('heat'));
+    if (Number.isFinite(heat) && heat >= 0) {
+      s.heatByFriend[s.p] = Math.min(999, Math.floor(heat));
+      s.heatByFriend[s.friend] = Math.min(999, Math.floor(heat));
+    }
   }
-  if (q.get('call') === '1' || q.get('call') === 'connecting') {
+  if (['1', 'connecting', 'active'].includes(q.get('call'))) {
     s.page = 2;
-    s.callPhase = 'connecting';
-  }
-  if (q.get('call') === 'active') {
-    s.page = 2;
-    s.callPhase = 'active';
-    s.callSeconds = 42;
+    s.tab = 'xiaozhi';
+    s.treeholeView = 'chat';
+    s.callPhase = q.get('call') === 'active' ? 'active' : 'connecting';
+    s.callSeconds = s.callPhase === 'active' ? 42 : 0;
   }
   render();
 })();
