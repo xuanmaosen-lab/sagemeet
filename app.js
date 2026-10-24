@@ -329,6 +329,16 @@ function planeRow(list) {
   </div>`;
 }
 
+/* "S" brand mark: one swoosh, the second is the same path turned 180°. */
+const BRAND_LOGO = `<svg class="brand-logo" viewBox="0 0 100 110" aria-hidden="true">
+  <defs>
+    <linearGradient id="logo-p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bca6f8"/><stop offset="1" stop-color="#7a59e0"/></linearGradient>
+    <linearGradient id="logo-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fa57c"/><stop offset="1" stop-color="#a9e5c6"/></linearGradient>
+  </defs>
+  <path fill="url(#logo-p)" d="M44 60C18 56 6 28 30 12C52 -2 92 2 95 24C97 38 86 45 77 41C69 37 64 31 54 31C40 31 33 46 44 60Z"/>
+  <path fill="url(#logo-g)" transform="rotate(180 50 55)" d="M44 60C18 56 6 28 30 12C52 -2 92 2 95 24C97 38 86 45 77 41C69 37 64 31 54 31C40 31 33 46 44 60Z"/>
+</svg>`;
+
 function uiIcon(name) {
   const paths = {
     arrow: '<path d="M4 12h15m-6-6 6 6-6 6"/>',
@@ -419,7 +429,7 @@ function wrap(body, chapterId) {
 function splash() {
   return wrap(`<div class="welcome-page">
     <header class="welcome-header">
-      <a class="brand-lockup" href="#" aria-label="智遇首页"><span class="mark mark-sm" aria-hidden="true"></span>智遇 <small>SAGEMEET</small></a>
+      <a class="brand-lockup" href="#" aria-label="智遇首页">${BRAND_LOGO}智遇 <small>SAGEMEET</small></a>
       <nav class="welcome-nav" aria-label="了解智遇"><a href="#how-it-works">怎样遇见</a><button type="button" data-a="mode-returning">回到我的树洞 ${uiIcon('arrow')}</button></nav>
     </header>
     <section class="welcome-hero" aria-labelledby="welcome-title">
@@ -432,7 +442,7 @@ function splash() {
       </div>
       <div class="welcome-art">
         <div class="welcome-orbit" aria-hidden="true"></div>
-        <div class="sf-bg"><video muted playsinline preload="metadata" src="assets/splash/footer-warm-720.mp4" aria-label="抱着爱心的小知玩偶"></video></div>
+        <div class="sf-bg"><img class="welcome-mascot" src="assets/mascot/xiaozhi.jpg" alt="抱着爱心的小知玩偶" width="900" height="900"></div>
         <div class="welcome-dialogue"><span class="dialogue-dot" aria-hidden="true"></span><span>你好呀，我是小知<small>你的倾听伙伴</small></span></div>
         <img class="welcome-garden" src="assets/garden/botanical-garden.webp" alt="" width="1400" height="934" aria-hidden="true">
         <div class="welcome-caption">慢慢说，我在听。${uiIcon('heart')}</div>
@@ -599,8 +609,8 @@ function onboarding() {
         </section>
       </div>
       <div class="page-cta">
-        ${btn('去和 Agent 聊聊', 'onext')}
         ${btn('‹ 上一步', 'oback', 'secondary')}
+        ${btn('去和 Agent 聊聊', 'onext')}
       </div>
     </section>`,
     1
