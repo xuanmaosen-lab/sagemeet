@@ -472,12 +472,6 @@ textarea.field{padding:14px 16px;line-height:1.6}
   flex:1;min-width:0;min-height:40px;padding:0 8px;border-radius:var(--r-pill);
   border:0;background:transparent;outline:none;
 }
-@media (max-width:480px){#chat .composer-call-label{display:none}}
-#chat button[type=submit]{
-  width:40px;height:40px;border-radius:50%;
-  background:var(--ink);color:#fff;font-size:16px;flex-shrink:0;
-  box-shadow:var(--shadow-btn);
-}
 #chat > button:first-child,
 #chat button[data-a=voice]{
   width:40px;height:40px;border-radius:50%;
@@ -763,15 +757,6 @@ textarea.field{padding:14px 16px;line-height:1.6}
   box-shadow:var(--glass-inner);
   font-size:13px !important;padding:6px 12px !important;margin:0 !important;
 }
-/* match % sits on the window's top-right corner, same as the plane seats */
-.peek-pct{
-  position:absolute;top:-7px;right:-7px;z-index:2;
-  font-style:normal;font-family:var(--font-display);
-  font-size:12px;font-weight:600;letter-spacing:-.01em;
-  padding:3px 8px;border-radius:var(--r-pill);
-  background:var(--terracotta);color:#fff;border:1.5px solid #fffdfa;
-  box-shadow:0 4px 12px rgba(216,104,72,.32);
-}
 .photo-card .hero-copy{
   position:absolute;left:0;right:0;bottom:0;padding:28px 24px;z-index:2;color:var(--ink);
 }
@@ -866,32 +851,7 @@ textarea.field{padding:14px 16px;line-height:1.6}
 .note-actions{display:flex;flex-direction:column;gap:12px;margin-top:24px}
 .note-links{display:flex;gap:16px}
 
-.match-peek{margin-top:8px}
 .match-plane{margin-top:var(--gap)}
-.match-peek-label{font-size:13px;color:var(--ink-mute);margin:0 0 14px}
-.match-peek-row{display:flex;gap:14px;overflow-x:auto;padding:10px 10px 8px;scrollbar-width:none}
-.match-peek-row::-webkit-scrollbar{display:none}
-/* small airplane windows: ink double frame, % on the top-right corner */
-.peek-card{
-  flex:0 0 76px;height:98px;border-radius:34% / 26%;overflow:visible;
-  position:relative;padding:4px;
-  background:#fffdfa;border:1.6px solid var(--ink);
-  box-shadow:var(--shadow-card);
-  transition:transform .2s, box-shadow .2s;
-}
-.peek-card .virt-wrap{
-  position:relative;width:100%;height:100%;overflow:hidden;
-  border-radius:32% / 24%;border:1.4px solid var(--ink);
-  background:var(--blush-soft);
-}
-.peek-card span{
-  position:absolute;left:0;right:0;bottom:0;padding:5px 4px 4px;
-  background:linear-gradient(transparent,rgba(246,241,234,.92));
-  color:var(--ink);font-size:11px;font-weight:500;text-align:center;
-  border-radius:0 0 32% 32% / 0 0 24% 24%;
-}
-.peek-card:hover{transform:translateY(-2px)}
-.peek-card.on{box-shadow:0 0 0 2px var(--terracotta), var(--shadow-card)}
 
 /* ——— Friends / Profile ——— */
 .friends-heading{
@@ -1145,20 +1105,33 @@ textarea.field{padding:14px 16px;line-height:1.6}
   background:rgba(248,224,216,.85);padding:2px 6px;border-radius:var(--r-pill);
 }
 #chat .composer-call{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:0 10px;height:40px;border-radius:var(--r-pill);
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:0;width:40px;height:40px;border-radius:50%;
   background:linear-gradient(135deg,var(--blush-soft),rgba(248,224,216,.55));
   box-shadow:var(--glass-inner), 0 0 0 1px rgba(216,104,72,.2);
   font-size:12px;font-weight:500;color:var(--ink);white-space:nowrap;flex-shrink:0;
 }
-#chat .composer-call-ico{font-size:14px;line-height:1}
-#chat .composer-call-label{font-size:12px}
-#chat .composer-send,
-#chat button[type=submit].composer-send{
-  width:40px;height:40px;border-radius:50%;
-  background:var(--ink);color:#fff;font-size:16px;flex-shrink:0;
-  box-shadow:var(--shadow-btn);
+#chat .composer-call-ico{font-size:14px;line-height:1;display:inline-flex}
+.ico-svg{width:1em;height:1em;display:inline-block;vertical-align:-.125em;flex-shrink:0}
+#chat button[data-a="voice"]{font-size:18px}
+.bubble .ico-svg{width:.9em;height:.9em;margin-right:2px}
+.ico-send{
+  width:18px;height:18px;display:block;margin:auto;background:currentColor;
+  -webkit-mask:url(assets/icons/send.png) center/contain no-repeat;
+  mask:url(assets/icons/send.png) center/contain no-repeat;
 }
+/* handset laid flat = universal "hang up" glyph */
+.ico-hang{display:inline-flex;transform:rotate(135deg)}
+/* the send button IS the paper-plane shape: no circle behind it */
+#chat .composer-send,
+#chat button[type=submit],
+#chat button[type=submit].composer-send{
+  width:40px;height:40px;border-radius:0;padding:0;
+  background:transparent;color:var(--ink);flex-shrink:0;
+  box-shadow:none;transition:color .2s, transform .2s;
+}
+#chat button[type=submit] .ico-send{width:32px;height:32px}
+#chat button[type=submit]:hover{color:var(--terracotta);transform:translate(-1px,-1px)}
 .treehole,.treehole-compose{
   max-width:var(--page-max);margin:0 auto;
   padding:var(--page-pad-y) var(--page-pad) calc(var(--footer-h) + 32px);
